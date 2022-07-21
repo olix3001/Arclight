@@ -51,6 +51,8 @@ Array literals as denoted as for example `[1, 2, 3]`, where all elements have th
 Tuples (type **`tuple`**) are great way to encode multiple data into a single
 variable. They are denoted as for example`(1, 2, 3)` and can be deconstructed using `(a, b) := (1, 2)`.
 
+Elements from tuple (index 0 for example) can be get using `t[0]` or `t.0`
+
 Tuple elements do not need to be of the same type.
 
 ### Dictionaries

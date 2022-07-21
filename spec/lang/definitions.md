@@ -76,3 +76,21 @@ To return value from the code block, you just write the value as the last statem
 ### Code blocks
 
 Code blocks are just blocks of code that can define scopes, they are denoted as `{ ... }` where `...` can be any list of expressions.
+
+### Match expression
+
+You can use match expression, which works similar to `switch` statement in many other languages. Is is used like
+
+```
+// Let's assume that x is an integer
+match x {
+    0..=2 => 0,
+
+    5
+    | 10..=15 => 1
+
+    _ => 2
+}
+```
+
+This will return 0 if `x` is between 0 and 2, return 1 if `x` is 5 or is between 10 and 15, and return 2 in every other scenario.
