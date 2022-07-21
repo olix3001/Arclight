@@ -77,7 +77,7 @@ If you want to pass function/lambda as an argument you should provide `(arg1: ty
 | Kind       | Defined over                     | Supported operations |
 | ---------- | -------------------------------- | -------------------- |
 | boolean    | **bool**                         | !, &&, \|\|, &, \|   |
-| numeric    | i*, u*, f*, uf*, char            | +, -, \*, /, ^       |
+| numeric    | i*, u*, f*, uf*, char            | +, -, \*, /          |
 | string     | str                              | +, [i]               |
 | array      | \*[]                             | +, [i], [range], ?   |
 | tuple      | ( ... )                          | [i]                  |

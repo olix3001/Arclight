@@ -64,7 +64,6 @@ same is true for other operators:
 | - | sub | 1 |
 | \* | mul | 1 |
 | / | div | 1 |
-| ^ | pow | 1 |
 | ! | not | 0 |
 | & | bin_and | 1 |
 | \| | bin_or | 1 |

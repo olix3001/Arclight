@@ -34,7 +34,7 @@ if we want to use `match` on the enum above, we can write
 ```
 // x: Enum
 match x {
-    A (a: i32) => { ... }
+    A (a: i32) => { ... },
     B (a: i64, b: i64) => { }
 }
 ```

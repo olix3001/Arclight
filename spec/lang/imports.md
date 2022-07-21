@@ -50,7 +50,7 @@ then in `main.arc` you can import `Lib` module using
 import lib::Lib;
 ```
 
-or if it is
+And then values can be accessed using `Lib::value`. Or if it is
 
 ```
 // lib.arc
