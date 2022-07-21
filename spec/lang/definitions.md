@@ -9,6 +9,8 @@ Function/loop/etc... body in arclight is just an expression that returns a value
 variable definition is denoted as `var name: type;` (without initialization)
 or `var name: type = exp;` (with initialization, type can be omitted).
 
+Variables can also be constant, to define such variable you are ought to use `const name: type = const_exp;` syntax. Constant expressions are things that don't change during the runtime of a program. Examples of such expressions are literals.
+
 ### Type definition
 
 Custom types can be defined as `typedef type_name type`. For example `typedef i32a i32[]` defines `i32a` as array of `i32`\'s.
@@ -20,6 +22,8 @@ Functions are defined as:
 ```
 fun function_name(arg1: type, arg2: type): return_type body
 ```
+
+Two functions with the same name can exist if they take different number or different types of arguments.
 
 ### If statement definition
 
@@ -62,6 +66,8 @@ And for loops that are known from many other programming languages
 ```
 for (expr; expr; expr) body
 ```
+
+In loops `break` and `continue` keywords can be used.
 
 ### Returns
 

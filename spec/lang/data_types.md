@@ -66,14 +66,22 @@ dict {
 
 and can be accessed with `dict[key]`.
 
+### Functions/Lambdas as type
+
+If you want to pass function/lambda as an argument you should provide `(arg1: type, arg2: type) => returnType` as an argument
+
 ### Operations
 
-| Kind       | Defined over                     | Supported operations  |
-| ---------- | -------------------------------- | --------------------- |
-| boolean    | **bool**                         | !, &&, \|\|, &, \|, ^ |
-| numeric    | i*, u*, f*, uf*, char            | +, -, \*, /, ^        |
-| array      | \*[]                             | +, [i], [range], ?    |
-| tuple      | ( ... )                          | [i]                   |
-| dict       | dict { ... }                     | [key], ?              |
-| comparison | i*, u*, f*, uf*, char            | <, <=, >, >=          |
-| comparison | bool, i*, u*, f*, uf*, char, str | ==, !=                |
+| Kind       | Defined over                     | Supported operations |
+| ---------- | -------------------------------- | -------------------- |
+| boolean    | **bool**                         | !, &&, \|\|, &, \|   |
+| numeric    | i*, u*, f*, uf*, char            | +, -, \*, /, ^       |
+| array      | \*[]                             | +, [i], [range], ?   |
+| tuple      | ( ... )                          | [i]                  |
+| dict       | dict { ... }                     | [key], ?             |
+| comparison | i*, u*, f*, uf*, char            | <, <=, >, >=         |
+| comparison | bool, i*, u*, f*, uf*, char, str | ==, !=               |
+
+### Type conversions
+
+It is possible to convert between some of the types, using `value as type` notation.
