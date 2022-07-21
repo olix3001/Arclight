@@ -60,7 +60,7 @@ Tuple elements do not need to be of the same type.
 Dictionaries (type **`dict`**) can hold data in a form of `(key, value)` pairs of unspecified types. They are denoted as:
 
 ```
-dict {
+{
     a: 'Hello',
     b: 'World',
 }
@@ -78,6 +78,7 @@ If you want to pass function/lambda as an argument you should provide `(arg1: ty
 | ---------- | -------------------------------- | -------------------- |
 | boolean    | **bool**                         | !, &&, \|\|, &, \|   |
 | numeric    | i*, u*, f*, uf*, char            | +, -, \*, /, ^       |
+| string     | str                              | +, [i]               |
 | array      | \*[]                             | +, [i], [range], ?   |
 | tuple      | ( ... )                          | [i]                  |
 | dict       | dict { ... }                     | [key], ?             |
