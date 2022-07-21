@@ -23,3 +23,7 @@ or if you need to specify a type, because it is not in function arguments, you u
 ```
 some_generic_function<i32>();
 ```
+
+### Inheritance
+
+If you want to accept only classes that extend other class or implement an interface, you can use `public fun some_function<T: MyClass>(): void { ... }` or `public fun some_function<T: MyInterface>(): void { ... }`

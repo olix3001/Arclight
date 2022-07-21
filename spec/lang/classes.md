@@ -76,3 +76,16 @@ same is true for other operators:
 | < | lt | 1 |
 | > | gt | 1 |
 | ? | contains | 1 |
+
+### Inheritance
+
+Classes can extend other classes using extends keyword
+
+```
+class MyClass extends OtherClass {
+    ...
+}
+```
+
+Then this class can be passed for type `&OtherClass`.
+Same is true for interfaces.
