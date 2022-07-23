@@ -3,18 +3,18 @@
 Every file that has something to export, should use `export` keyword. For example:
 
 ```
-// lib.arc
+// lib
 export module Lib {
     ...
 }
 ```
 
-Syntax above will export the `Lib` module from `lib.arc` file.
+Syntax above will export the `Lib` module from `lib` file.
 
 One file can have multiple exports, For example:
 
 ```
-// lib.arc
+// lib
 export module A {
     ...
 }
@@ -29,31 +29,31 @@ export module B {
 You can import from other files using `import` keyword. For example if you have file structure like
 
 ```
-src
-├── main.arc
-└── lib.arc
+src (dir)
+├── main (file)
+└── lib (file)
 ```
 
-and `lib.arc` file is:
+and `lib` file is:
 
 ```
-// lib.arc
+// lib
 export module Lib {
     ...
 }
 ```
 
-then in `main.arc` you can import `Lib` module using
+then in `main` you can import `Lib` module using
 
 ```
-// main.arc
+// main
 import lib::Lib;
 ```
 
 And then values can be accessed using `Lib::value`. Or if it is
 
 ```
-// lib.arc
+// lib
 export module Lib {
     fun lib_function(arg1: type, arg2: type): returnType { ... }
 }
@@ -62,7 +62,7 @@ export module Lib {
 And only thing you need is `lib_function` you can use
 
 ```
-// main.arc
+// main
 import lib::Lib { lib_function };
 ```
 
