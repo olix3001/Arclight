@@ -88,3 +88,13 @@ If you want to pass function/lambda as an argument you should provide `(arg1: ty
 ### Type conversions
 
 It is possible to convert between some of the types, using `value as type` notation.
+
+### String interpolation
+
+You can use `$` operator to identify a string literal as an interpolated string (simpler and cleaner than format).
+```
+var option = 1;
+var name = "Name"
+var x = $"Hey {name}, you chose {option} option!";
+```
+
