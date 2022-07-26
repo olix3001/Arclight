@@ -30,7 +30,7 @@ macro_rules! append_token {
 pub mod lexer {
     use std::{io::{ BufReader, BufRead }, fs::File};
     
-    #[derive(Debug, Clone)]
+    #[derive(Debug, Clone, PartialEq, Eq)]
     pub enum TokenType {
         // Single-character tokens.
         Paren(char),
@@ -47,9 +47,9 @@ pub mod lexer {
     #[allow(dead_code)]
     #[derive(Debug, Clone)]
     pub struct Token {
-        token_type: TokenType,
-        line: usize,
-        column: usize,
+        pub token_type: TokenType,
+        pub line: usize,
+        pub column: usize,
     }
 
     pub fn tokenize(input: &mut BufReader<File>) -> Vec<Token> {

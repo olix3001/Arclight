@@ -1,0 +1,4 @@
+import hello;
+import hello::world;
+import hello { println };
+import hello::world { print, println };
