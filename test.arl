@@ -4,5 +4,5 @@ import hello { println };
 import hello::world { print, println };
 
 fun add(arg1: i32, arg2: i32): i32 {
-    var hello: i64;
+    var hello: i32;
 }

@@ -4,19 +4,10 @@ use crate::{try_parse, lexer::lexer::TokenType};
 
 use super::{Parseable, block_expression::BlockExpr, value_expression::ValueExpr };
 
+// Parses any basic expression
 pub struct BasicExpr {}
 
 impl Parseable for BasicExpr {
-    fn parse(tokens: &Vec<crate::lexer::lexer::Token>, pos: &mut usize) -> Result<Box<dyn super::ASTExpr>, String> {
-        return try_parse!(tokens, *pos, BasicValueExpr);
-    }
-}
-
-
-// Parses any basic expression
-pub struct BasicValueExpr {}
-
-impl Parseable for BasicValueExpr {
     fn parse(tokens: &Vec<crate::lexer::lexer::Token>, pos: &mut usize) -> Result<Box<dyn super::ASTExpr>, String> {
         let temp = try_parse!(tokens, *pos, BlockExpr);
         if temp.is_ok() {
