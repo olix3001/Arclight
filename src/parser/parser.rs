@@ -1,6 +1,6 @@
 use crate::{lexer::lexer::Token, try_parse};
 
-use super::expressions::{ASTExpr, import_expression::ImportExpr, Parseable};
+use super::expressions::{ASTExpr, import_expression::ImportExpr, Parseable, function_expression::FunctionExpr};
 
 
 pub fn parse(tokens: &Vec<Token>) -> Vec<Box<dyn ASTExpr>> {
@@ -25,7 +25,8 @@ impl<'a> Parser<'a> {
         let mut ast: Vec<Box<dyn ASTExpr>> = Vec::new();
 
         while self.pos < self.tokens.len() {
-            match try_parse!(self.tokens, self.pos, ImportExpr) {
+            // Global things to parse
+            match try_parse!(self.tokens, self.pos, ImportExpr FunctionExpr) {
                 Ok(expr) => { 
                     ast.push(expr);
                 },
@@ -39,8 +40,8 @@ impl<'a> Parser<'a> {
         ast
     }
     
-    // fn parse_expr<T>(&mut self) -> Result<Box<dyn ASTExpr>, String> where T: Parseable {
-    //     T::parse(self.tokens, &mut self.pos)
-    // }
+    fn parse_expr<T>(&mut self) -> Result<Box<dyn ASTExpr>, String> where T: Parseable {
+        T::parse(self.tokens, &mut self.pos)
+    }
     
 }

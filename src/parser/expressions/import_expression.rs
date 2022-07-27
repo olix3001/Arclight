@@ -42,7 +42,7 @@ impl Parseable for ImportExpr {
             if tokens[*pos].token_type == TokenType::Separator(';') {
                 // Expect semicolon
                 if tokens[*pos].token_type != TokenType::Separator(';') {
-                    return Err(format!("Expected semicolon, found {:?}", tokens[*pos]));
+                    parser_error!(format!("Expected semicolon, found {:?}", tokens[*pos]));
                 }
                 *pos += 1;
                 return Ok(Box::new(ImportExpr::new(path, imports)));
@@ -82,7 +82,7 @@ impl Parseable for ImportExpr {
     
         // Should be followed by a semicolon
         if tokens[*pos].token_type != TokenType::Separator(';') {
-            return Err(format!("Expected semicolon, found {:?}", tokens[*pos]));
+            parser_error!(format!("Expected semicolon, found {:?}", tokens[*pos]));
         }
         *pos += 1;
     
@@ -96,6 +96,6 @@ impl ASTExpr for ImportExpr {
     }
     
     fn to_string(&self) -> String {
-        return format!("{:?}", self); 
+        return format!("Import {} ({})", self.path.join("::"), self.imports.join(", ")); 
     }
 }
