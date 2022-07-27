@@ -96,6 +96,6 @@ impl ASTExpr for ImportExpr {
     }
     
     fn to_string(&self) -> String {
-        return format!("Import {} ({})", self.path.join("::"), self.imports.join(", ")); 
+        return format!("Import {} {{ {} }}", self.path.join("::"), self.imports.join(", ")); 
     }
 }

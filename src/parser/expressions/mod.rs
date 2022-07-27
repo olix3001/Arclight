@@ -33,6 +33,7 @@ pub enum DataType {
     String,
     Void,
     Custom(String),
+    Unknown
 }
 
 pub struct VoidExpr {}
@@ -44,9 +45,19 @@ impl ASTExpr for VoidExpr {
         "NOP".to_string()
     }
 }
+impl Parseable for VoidExpr {
+    fn parse(tokens: &Vec<Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, String> {
+        return Err("Void expression is not parseable".to_string());
+    }
+}
 
 pub mod import_expression;
 pub mod function_expression;
+pub mod block_expression;
+pub mod basic_expression;
+pub mod variable_definition_expression;
+pub mod value_expression;
+
 impl DataType {
     pub fn parse(Token: &Token) -> Result<DataType, String> {
         match Token.token_type {

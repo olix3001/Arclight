@@ -4,7 +4,7 @@ use inkwell::builder::Builder;
 
 use crate::{lexer::lexer::TokenType, parser_error};
 
-use super::{ASTExpr, DataType, Parseable, VoidExpr};
+use super::{ASTExpr, DataType, Parseable, VoidExpr, basic_expression::BasicExpr};
 
 pub struct FunctionExpr {
     body: Box<dyn ASTExpr>,
@@ -58,7 +58,6 @@ impl Parseable for FunctionExpr {
                 },
                 _ => parser_error!(format!("Expected argument name, found {:?}", tokens[*pos]))
             }
-            println!("P: {:?}", tokens[*pos]);
             if tokens[*pos].token_type == TokenType::Separator(',') {
                 *pos += 1;
             } else {
@@ -77,7 +76,12 @@ impl Parseable for FunctionExpr {
         return_type = DataType::parse(&tokens[*pos])?;
 
         // Should be followed by a function body
-        // TODO: Add function body
+        *pos += 1;
+        let t = BasicExpr::parse(tokens, pos);
+        match t {
+            Ok(expr) => body = expr,
+            Err(_) => parser_error!(format!("Expected function body, found {:?}", tokens[*pos]))
+        }
 
         // Return function
         Ok(Box::new(FunctionExpr {
