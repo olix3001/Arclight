@@ -51,8 +51,15 @@
             <sub><b>Oliwier Michalik</b></sub><br/>
             <sub>Founder & Developer<sub>
         </td>
+        <td align="center">
+            <a href="https://github.com/InfoTCube">
+                <img src="https://avatars.githubusercontent.com/u/59064153?v=4" width="100px" height="100px" alt=""/>
+            </a>
+            <br/>
+            <sub><b>Tymoteusz Marzec</b></sub><br/>
+            <sub>Motivator & Tester<sub>
+        </td>
     </tr>
-
 </table>
 
 :pencil: If you know something about compilers, you know rust and want to join this project just leave an Issue with "I want to join" template.
