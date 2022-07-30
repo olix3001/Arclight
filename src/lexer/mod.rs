@@ -40,6 +40,13 @@ pub mod lexer {
         Quote(char),
         // Identifiers
         Identifier(String),
+        // Numbers
+        Integer(String),
+        Float(String),
+        UnsignedInteger(String),
+        UnsignedFloat(String),
+        // Strings
+        String(String),
         // End of file.
         EOF,
     }    
@@ -62,6 +69,7 @@ pub mod lexer {
             let mut buffer = String::new();
 
             for c in line.chars() {
+                // TODO: Optimize this and add integer / float literals
                 match c {
                     // Single-character tokens.
                     '(' => {

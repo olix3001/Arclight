@@ -59,8 +59,8 @@ pub mod variable_definition_expression;
 pub mod value_expression;
 
 impl DataType {
-    pub fn parse(Token: &Token) -> Result<DataType, String> {
-        match Token.token_type {
+    pub fn parse(token: &Token) -> Result<DataType, String> {
+        match token.token_type {
             TokenType::Identifier(ref s) => {
                 match s.as_str() {
                     "i8" => Ok(DataType::I8),
@@ -85,7 +85,7 @@ impl DataType {
                     _ => Ok(DataType::Custom(s.clone())),
                 }
             }
-            _ => Err(format!("Expected type, found {:?}", Token)),
+            _ => Err(format!("Expected type, found {:?}", token)),
         }
     }
 }
