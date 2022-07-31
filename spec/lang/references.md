@@ -9,8 +9,8 @@ Reference is like a pointer, that allows us to use the value without taking it's
 Every value that is in a scope by default has an owner. Owner is a scope that this variable is in. Variable is automatically removed from the memory when the owner dies, for example
 
 ```
-{ // a is invalid here as it is not defined yet
-    var a = 1; // from this point a is valid as it is defined
-    ... // a is still valid here
-} // from this point a is invalid as it's owner scope has ended
+{ # a is invalid here as it is not defined yet
+    var a = 1; # from this point a is valid as it is defined
+    ... # a is still valid here
+} # from this point a is invalid as it's owner scope has ended
 ```

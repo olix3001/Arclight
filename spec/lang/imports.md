@@ -3,7 +3,7 @@
 Every file that has something to export, should use `export` keyword. For example:
 
 ```
-// lib
+# lib
 export module Lib {
     ...
 }
@@ -14,7 +14,7 @@ Syntax above will export the `Lib` module from `lib` file.
 One file can have multiple exports, For example:
 
 ```
-// lib
+# lib
 export module A {
     ...
 }
@@ -37,7 +37,7 @@ src (dir)
 and `lib` file is:
 
 ```
-// lib
+# lib
 export module Lib {
     ...
 }
@@ -46,14 +46,14 @@ export module Lib {
 then in `main` you can import `Lib` module using
 
 ```
-// main
+# main
 import lib::Lib;
 ```
 
 And then values can be accessed using `Lib::value`. Or if it is
 
 ```
-// lib
+# lib
 export module Lib {
     fun lib_function(arg1: type, arg2: type): returnType { ... }
 }
@@ -62,7 +62,7 @@ export module Lib {
 And only thing you need is `lib_function` you can use
 
 ```
-// main
+# main
 import lib::Lib { lib_function };
 ```
 
