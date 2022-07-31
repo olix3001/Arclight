@@ -1,13 +1,15 @@
-use std::{fs::File, io::BufReader};
+use std::{fs::File, io::{BufReader, Read}};
 
 mod lexer;
 mod parser;
 
 fn main() {
-    let f = File::open("test.arl").unwrap();
-    let mut f = BufReader::new(f);
+    let mut f = File::open("test.arl").unwrap();
 
-    let tokens = lexer::lexer::tokenize(&mut f);
+    let mut content = String::new();
+    f.read_to_string(&mut content).unwrap();
+
+    let tokens = lexer::lexer::tokenize(content.as_str());
 
     for t in tokens.iter() {
         println!("{:?}", t);

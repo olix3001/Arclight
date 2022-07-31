@@ -1,34 +1,5 @@
-macro_rules! append_buffer {
-    ($buffer:ident, $tokens:ident, $line_no:ident, $column_no:ident) => {
-        {
-            // Append the buffer to the tokens if it is not empty
-            if $buffer.len() > 0 {
-                $tokens.push(Token {
-                    token_type: TokenType::Identifier($buffer.clone()),
-                    line: $line_no,
-                    column: $column_no - $buffer.len(),
-                });
-                $buffer.clear();
-            }
-        }
-    };
-}
-
-macro_rules! append_token {
-    ($tokens:ident, $token_type:expr, $line_no:ident, $column_no:ident) => {
-        {
-            // Append the token to the tokens
-            $tokens.push(Token {
-                token_type: $token_type,
-                line: $line_no,
-                column: $column_no,
-            });
-        }
-    };
-}
 
 pub mod lexer {
-    use std::{io::{ BufReader, BufRead }, fs::File};
     
     #[derive(Debug, Clone, PartialEq, Eq)]
     pub enum TokenType {
@@ -37,14 +8,10 @@ pub mod lexer {
         Brace(char),
         Operator(char),
         Separator(char),
-        Quote(char),
         // Identifiers
         Identifier(String),
         // Numbers
-        Integer(String),
-        Float(String),
-        UnsignedInteger(String),
-        UnsignedFloat(String),
+        Number(String),
         // Strings
         String(String),
         // End of file.
@@ -59,127 +26,204 @@ pub mod lexer {
         pub column: usize,
     }
 
-    pub fn tokenize(input: &mut BufReader<File>) -> Vec<Token> {
-        let mut tokens: Vec<Token> = Vec::new();
-        let mut line_no = 1;
-        let mut column_no = 1;
+    #[derive(Clone)]
+    enum TransitionAction {
+        None,
+        Push,
+        Flush(fn(&str) -> TokenType),
+        Feedback,
+        Error(String),
+    }
 
-        for line in input.lines() {
-            let line = line.unwrap();
-            let mut buffer = String::new();
+    #[derive(Clone)]
+    struct Transition {
+        pub actions: Vec<TransitionAction>,
+        should_transition_for: fn(char) -> bool,
+        pub next_state: Box<State>,
+    }
 
-            for c in line.chars() {
-                // TODO: Optimize this and add integer / float literals
-                match c {
-                    // Single-character tokens.
-                    '(' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Paren('('), line_no, column_no);
-                    }
-                    ')' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Paren(')'), line_no, column_no);
-                    }
-                    '{' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Brace('{'), line_no, column_no);
-                    }
-                    '}' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Brace('}'), line_no, column_no);
-                    }
-                    '+' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Operator('+'), line_no, column_no);
-                    }
-                    '-' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Operator('-'), line_no, column_no);
-                    }
-                    '*' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Operator('*'), line_no, column_no);
-                    }
-                    '/' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Operator('/'), line_no, column_no);
-                    }
-                    '%' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Operator('%'), line_no, column_no);
-                    }
-                    '!' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Operator('!'), line_no, column_no);
-                    }
-                    '=' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Operator('='), line_no, column_no);
-                    },
-                    '<' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Operator('<'), line_no, column_no);
-                    }
-                    '>' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Operator('>'), line_no, column_no);
-                    }
-                    ',' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Separator(','), line_no, column_no);
-                    }
-                    '.' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Separator('.'), line_no, column_no);
-                    }
-                    ';' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Separator(';'), line_no, column_no);
-                    }
-                    ':' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Separator(':'), line_no, column_no);
-                    }
-                    '\'' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Quote('\''), line_no, column_no);
-                    }
-                    '"' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        append_token!(tokens, TokenType::Quote('"'), line_no, column_no);
-                    }
-
-                    ' ' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                    }
-                    '\t' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                    }
-                    '\r' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                    }
-
-                    '\n' => {
-                        append_buffer!(buffer, tokens, line_no, column_no);
-                        line_no += 1;
-                        column_no = 1;
-                    }
-
-                    // Multi character identifiers
-                    _ => {
-                        buffer.push(c);
-                    }
-                }
-                column_no += 1;
+    impl Transition {
+        pub fn new(should_transition_for: fn(char) -> bool, next_state: Box<State>, actions: Vec<TransitionAction>) -> Transition {
+            Transition {
+                actions,
+                should_transition_for,
+                next_state,
             }
-
-            line_no += 1;
-            column_no = 1;
         }
 
-        // Append EOF token
-        append_token!(tokens, TokenType::EOF, line_no, column_no);
+        pub fn should_transition_for(&self, c: char) -> bool {
+            (self.should_transition_for)(c)
+        }
+    }
 
-        return tokens;
+    macro_rules! create_transition {
+        ($should_transition: expr, $next_state: expr, $($actions: expr), +) => {
+            Box::new(Transition::new($should_transition, $next_state, vec![$($actions), +]))
+        }
+    }
+
+    #[derive(Clone)]
+    struct State {
+        pub transitions: Vec<Box<Transition>>,
+    }
+    impl State {
+        pub fn new(transitions: Vec<Box<Transition>>) -> State {
+            State {
+                transitions,
+            }
+        }
+        pub fn set_transition(&mut self, transitions: Vec<Box<Transition>>) {
+            self.transitions = transitions;
+        }
+    }
+
+    struct Lexer {
+        tokens: Vec<Token>,
+        line_no: usize,
+        column_no: usize,
+        curr_token: String,
+        state: Box<State>,
+    }
+
+    impl Lexer {
+
+        pub fn new(state: Box<State>) -> Self {
+            Self {
+                tokens: vec![],
+                line_no: 0,
+                column_no: 0,
+                curr_token: String::new(),
+                state
+            }
+        }
+
+        pub fn feed(&mut self, c: char) {
+            // change line and/or column
+            if c == '\n' {
+                self.line_no += 1;
+                self.column_no = 0;
+            } else {
+                self.column_no += 1;
+            }
+
+            for transition in self.state.transitions.clone().iter() {
+                if transition.should_transition_for(c) {
+                    self.state = transition.next_state.clone();
+                    for action in transition.actions.iter() {
+                        match action {
+                            TransitionAction::None => {},
+                            TransitionAction::Push => {
+                                self.curr_token.push(c);
+                            },
+                            TransitionAction::Flush(tok) => {
+                                self.tokens.push(Token {
+                                    token_type: tok(&self.curr_token),
+                                    line: self.line_no,
+                                    column: self.column_no,
+                                });
+                                self.curr_token.clear();
+                            },
+                            TransitionAction::Feedback => {
+                                self.feed(c)
+                            },
+                            TransitionAction::Error(msg) => {
+                                panic!("{} at line {}, column {}", msg, self.line_no, self.column_no);
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        pub fn feed_str(&mut self, string: &str) {
+            for c in string.chars() {
+                self.feed(c);
+            }
+        }
+    }
+
+    macro_rules! flush {
+        ($token_type: ident) => {
+            TransitionAction::Flush(|s: &str| TokenType::$token_type(s.to_string()))
+        };
+        ($token_type: ident !) => {
+            TransitionAction::Flush(|s: &str| TokenType::$token_type(s.chars().next().unwrap()))
+        };
+    }
+
+    pub fn tokenize(input: &str) -> Vec<Token> {
+        let mut start = State::new(vec![]);
+        
+        let mut string_state = State::new(vec![]);
+        let mut ident_state = State::new(vec![]);
+        let mut number_state = State::new(vec![]);
+        
+        start.set_transition(vec![
+            create_transition!(|c: char| c == ' ' || c == '\t' || c == '\n' || c == '\r', Box::new(start), TransitionAction::None),
+            // TODO: Add comment transition
+            // Basic transitions
+            create_transition!(|c: char| c == ',', Box::new(start), TransitionAction::Push, flush!(Separator !)),
+            create_transition!(|c: char| c == '[', Box::new(start), TransitionAction::Push, flush!(Brace !)),
+            create_transition!(|c: char| c == ']', Box::new(start), TransitionAction::Push, flush!(Brace !)),
+            create_transition!(|c: char| c == '{', Box::new(start), TransitionAction::Push, flush!(Brace !)),
+            create_transition!(|c: char| c == '}', Box::new(start), TransitionAction::Push, flush!(Brace !)),
+            create_transition!(|c: char| c == ':', Box::new(start), TransitionAction::Push, flush!(Separator !)),
+            create_transition!(|c: char| c == ';', Box::new(start), TransitionAction::Push, flush!(Separator !)),
+            create_transition!(|c: char| c == '(', Box::new(start), TransitionAction::Push, flush!(Paren !)),
+            create_transition!(|c: char| c == ')', Box::new(start), TransitionAction::Push, flush!(Paren !)),
+            create_transition!(|c: char| c == '+', Box::new(start), TransitionAction::Push, flush!(Operator !)),
+            create_transition!(|c: char| c == '-', Box::new(start), TransitionAction::Push, flush!(Operator !)),
+            create_transition!(|c: char| c == '*', Box::new(start), TransitionAction::Push, flush!(Operator !)),
+            create_transition!(|c: char| c == '/', Box::new(start), TransitionAction::Push, flush!(Operator !)),
+            create_transition!(|c: char| c == '%', Box::new(start), TransitionAction::Push, flush!(Operator !)),
+            create_transition!(|c: char| c == '=', Box::new(start), TransitionAction::Push, flush!(Operator !)),
+            create_transition!(|c: char| c == '!', Box::new(start), TransitionAction::Push, flush!(Operator !)),
+            create_transition!(|c: char| c == '<', Box::new(start), TransitionAction::Push, flush!(Operator !)),
+            create_transition!(|c: char| c == '>', Box::new(start), TransitionAction::Push, flush!(Operator !)),
+            create_transition!(|c: char| c == '&', Box::new(start), TransitionAction::Push, flush!(Operator !)),
+            create_transition!(|c: char| c == '|', Box::new(start), TransitionAction::Push, flush!(Operator !)),
+            
+            // Number
+            create_transition!(|c: char| c.is_numeric(), Box::new(number_state), TransitionAction::None),
+            
+            // String
+            create_transition!(|c: char| c == '"', Box::new(string_state), TransitionAction::None),
+            
+            // Char
+            // TODO: Add char state
+            
+            // Ident
+            create_transition!(|_c: char| true, Box::new(ident_state), TransitionAction::None),
+        ]);
+        // Number
+        number_state.set_transition(vec![
+            create_transition!(|c: char| c.is_numeric(), Box::new(number_state), TransitionAction::Push),
+            create_transition!(|c: char| !c.is_numeric(), Box::new(start), flush!(Number)),
+        ]);
+
+            // String
+        string_state.set_transition(vec![
+            create_transition!(|c: char| c != '"', Box::new(string_state), TransitionAction::Push),
+            create_transition!(|c: char| c == '"', Box::new(start), flush!(String)),
+        ]);
+
+        // Ident
+        ident_state.set_transition(vec![
+            create_transition!(|c: char| c.is_alphanumeric() || c == '_', Box::new(ident_state), TransitionAction::Push),
+            create_transition!(|c: char| !c.is_alphanumeric() && c != '_', Box::new(start), flush!(Identifier)),
+        ]);
+                
+        let mut lexer = Lexer::new(Box::new(start));
+        lexer.feed_str(input);
+                
+        // Add EOF at the end
+        lexer.tokens.push(Token {
+            token_type: TokenType::EOF,
+            line: lexer.line_no,
+            column: lexer.column_no,
+        });
+                
+        lexer.tokens
     }
 }
