@@ -98,7 +98,14 @@ impl ASTExpr for FunctionExpr {
         todo!();
     }
     fn to_string(&self) -> String {
-        format!("Function ({:?}) => {:?} {}", self.arguments, self.return_type, self.body.to_string())
+        let mut arguments = String::new();
+        let mut kv = Vec::from_iter(self.arguments.keys());
+        kv.sort();
+        for arg in kv.iter() {
+            arguments.push_str(&format!("{}: {:?}, ", arg, self.arguments.get(arg as &str).unwrap()));
+        }
+
+        format!("Function ({}) => {:?} {}", arguments, self.return_type, self.body.to_string())
     }
 }
 
@@ -125,7 +132,7 @@ mod tests {
         ];
         let mut pos = 0;
         let expr = super::FunctionExpr::parse(&tokens, &mut pos).unwrap();
-        assert_eq!(expr.to_string(), "Function ({}) => I32 {\n  \n}");
+        assert_eq!(expr.to_string(), "Function () => I32 {\n  \n}");
     }
 
     #[test]
@@ -149,10 +156,7 @@ mod tests {
         ];
         let mut pos = 0;
         let expr = super::FunctionExpr::parse(&tokens, &mut pos).unwrap();
-        let mut argmap: HashMap<String, DataType> = HashMap::new();
-        argmap.insert("arg1".to_string(), DataType::F32);
-        argmap.insert("arg2".to_string(), DataType::I64);
-        assert_eq!(expr.to_string(), format!("Function ({:?}) => U16 {{\n  \n}}", argmap));
+        assert_eq!(expr.to_string(), "Function (arg1: F32, arg2: I64, ) => U16 {\n  \n}");
     }
 
 }
