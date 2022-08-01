@@ -20,3 +20,8 @@ jobs:
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
+    - name: Export artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: 'arclight'
+        path: target/debug/arclight
