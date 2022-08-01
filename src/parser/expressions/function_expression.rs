@@ -101,3 +101,58 @@ impl ASTExpr for FunctionExpr {
         format!("Function ({:?}) => {:?} {}", self.arguments, self.return_type, self.body.to_string())
     }
 }
+
+
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use crate::{lexer::lexer::TokenType, test_token, parser::expressions::{Parseable, DataType}};
+
+
+    #[test]
+    fn parse_function_without_args() {
+        let tokens = vec![
+            test_token!(TokenType::Identifier("fun".to_string())),
+            test_token!(TokenType::Identifier("test".to_string())),
+            test_token!(TokenType::Paren('(')),
+            test_token!(TokenType::Paren(')')),
+            test_token!(TokenType::Separator(':')),
+            test_token!(TokenType::Identifier("i32".to_string())),
+            test_token!(TokenType::Brace('{')),
+            test_token!(TokenType::Brace('}')),
+        ];
+        let mut pos = 0;
+        let expr = super::FunctionExpr::parse(&tokens, &mut pos).unwrap();
+        assert_eq!(expr.to_string(), "Function ({}) => I32 {\n  \n}");
+    }
+
+    #[test]
+    fn parse_function_with_args() {
+        let tokens = vec![
+            test_token!(TokenType::Identifier("fun".to_string())),
+            test_token!(TokenType::Identifier("test".to_string())),
+            test_token!(TokenType::Paren('(')),
+            test_token!(TokenType::Identifier("arg1".to_string())),
+            test_token!(TokenType::Separator(':')),
+            test_token!(TokenType::Identifier("f32".to_string())),
+            test_token!(TokenType::Separator(',')),
+            test_token!(TokenType::Identifier("arg2".to_string())),
+            test_token!(TokenType::Separator(':')),
+            test_token!(TokenType::Identifier("i64".to_string())),
+            test_token!(TokenType::Paren(')')),
+            test_token!(TokenType::Separator(':')),
+            test_token!(TokenType::Identifier("u16".to_string())),
+            test_token!(TokenType::Brace('{')),
+            test_token!(TokenType::Brace('}')),
+        ];
+        let mut pos = 0;
+        let expr = super::FunctionExpr::parse(&tokens, &mut pos).unwrap();
+        let mut argmap: HashMap<String, DataType> = HashMap::new();
+        argmap.insert("arg1".to_string(), DataType::F32);
+        argmap.insert("arg2".to_string(), DataType::I64);
+        assert_eq!(expr.to_string(), format!("Function ({:?}) => U16 {{\n  \n}}", argmap));
+    }
+
+}

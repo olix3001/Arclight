@@ -99,3 +99,58 @@ impl ASTExpr for ImportExpr {
         return format!("Import {} {{ {} }}", self.path.join("::"), self.imports.join(", ")); 
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use crate::{lexer::lexer::{Token, TokenType}, parser::expressions::Parseable, test_token};
+
+
+    #[test]
+    fn parse_single_import_expression() {
+        let tokens = vec![
+            test_token!(TokenType::Identifier("import".to_string())), 
+            test_token!(TokenType::Identifier("std".to_string())), 
+            test_token!(TokenType::Separator(';')),
+        ];
+        let mut pos = 0;
+        let expr = super::ImportExpr::parse(&tokens, &mut pos).unwrap();
+        assert_eq!(expr.to_string(), "Import std {  }");
+    }
+
+    #[test]
+    fn parse_multiple_import_expression() {
+        let tokens = vec![
+            test_token!(TokenType::Identifier("import".to_string())),
+            test_token!(TokenType::Identifier("std".to_string())), 
+            test_token!(TokenType::Separator(':')),
+            test_token!(TokenType::Separator(':')),
+            test_token!(TokenType::Identifier("test".to_string())),
+            test_token!(TokenType::Separator(';')),
+        ];
+        let mut pos = 0;
+        let expr = super::ImportExpr::parse(&tokens, &mut pos).unwrap();
+        assert_eq!(expr.to_string(), "Import std::test {  }");
+    }
+
+    #[test]
+    fn parse_select_import_expression() {
+        let tokens = vec![
+            test_token!(TokenType::Identifier("import".to_string())),
+            test_token!(TokenType::Identifier("std".to_string())),
+            test_token!(TokenType::Separator(':')),
+            test_token!(TokenType::Separator(':')),
+            test_token!(TokenType::Identifier("test".to_string())),
+            test_token!(TokenType::Brace('{')),
+            test_token!(TokenType::Identifier("hello".to_string())),
+            test_token!(TokenType::Separator(',')),
+            test_token!(TokenType::Identifier("world".to_string())),
+            test_token!(TokenType::Brace('}')),
+            test_token!(TokenType::Separator(';')),
+        ];
+        let mut pos = 0;
+        let expr = super::ImportExpr::parse(&tokens, &mut pos).unwrap();
+        assert_eq!(expr.to_string(), "Import std::test { hello, world }");
+    }
+
+}

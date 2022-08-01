@@ -51,7 +51,7 @@ impl Parseable for VarDefExpr {
 
         // Can be followed by an equals sign
         *pos += 1;
-        if tokens[*pos].token_type == TokenType::Operator('=') {
+        if tokens[*pos].token_type == TokenType::Operator("=".to_string()) {
             *pos += 1;
         } else {
             return Ok(Box::new(VarDefExpr {
@@ -90,4 +90,27 @@ impl ASTExpr for VarDefExpr {
             format!("Var {:?} {}", self.data_type, self.name)
         }
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{lexer::lexer::TokenType, test_token, parser::expressions::Parseable};
+
+
+    #[test]
+    fn parse_variable_without_value() {
+        let tokens = vec![
+            test_token!(TokenType::Identifier("var".to_string())),
+            test_token!(TokenType::Identifier("x".to_string())),
+            test_token!(TokenType::Separator(':')),
+            test_token!(TokenType::Identifier("i32".to_string())),
+            test_token!(TokenType::Separator(';')),
+        ];
+        let mut pos = 0;
+        let expr = super::VarDefExpr::parse(&tokens, &mut pos);
+        assert!(expr.is_ok());
+        let expr = expr.unwrap();
+        assert_eq!(expr.to_string(), "Var I32 x");
+    }
+
 }

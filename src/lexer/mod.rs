@@ -6,7 +6,7 @@ pub mod lexer {
         // Single-character tokens.
         Paren(char),
         Brace(char),
-        Operator(char),
+        Operator(String),
         Separator(char),
         // Identifiers
         Identifier(String),
@@ -33,6 +33,7 @@ pub mod lexer {
         Number,
         String,
         Comment,
+        Operator,
         Error,
     }
     
@@ -87,7 +88,7 @@ pub mod lexer {
                 LexerState::Start => {
                     // Number token
                     if c.is_numeric() {
-                        add_token!(self, LexerState::Number);
+                        add_token!(self, LexerState::Number, c ;);
                     } else {
                         // Handle single tokens
                         match c {
@@ -100,19 +101,19 @@ pub mod lexer {
                             ',' => add_token!(self, TokenType::Separator(','), LexerState::Start),
                             '.' => add_token!(self, TokenType::Separator('.'), LexerState::Start),
                             ';' => add_token!(self, TokenType::Separator(';'), LexerState::Start),
-                            '=' => add_token!(self, TokenType::Operator('='), LexerState::Start),
-                            '+' => add_token!(self, TokenType::Operator('+'), LexerState::Start),
-                            '-' => add_token!(self, TokenType::Operator('-'), LexerState::Start),
-                            '*' => add_token!(self, TokenType::Operator('*'), LexerState::Start),
-                            '%' => add_token!(self, TokenType::Operator('%'), LexerState::Start),
-                            '!' => add_token!(self, TokenType::Operator('!'), LexerState::Start),
-                            '<' => add_token!(self, TokenType::Operator('<'), LexerState::Start),
-                            '>' => add_token!(self, TokenType::Operator('>'), LexerState::Start),
-                            '&' => add_token!(self, TokenType::Operator('&'), LexerState::Start),
-                            '|' => add_token!(self, TokenType::Operator('|'), LexerState::Start),
+                            '=' => add_token!(self, LexerState::Operator, c ;),
+                            '+' => add_token!(self, LexerState::Operator, c ;),
+                            '-' => add_token!(self, LexerState::Operator, c ;),
+                            '*' => add_token!(self, LexerState::Operator, c ;),
+                            '%' => add_token!(self, LexerState::Operator, c ;),
+                            '!' => add_token!(self, LexerState::Operator, c ;),
+                            '<' => add_token!(self, LexerState::Operator, c ;),
+                            '>' => add_token!(self, LexerState::Operator, c ;),
+                            '&' => add_token!(self, LexerState::Operator, c ;),
+                            '|' => add_token!(self, LexerState::Operator, c ;),
 
                             // More complex tokens
-                            '/' => add_token!(self, TokenType::Operator('/'), LexerState::Start),
+                            '/' => add_token!(self, TokenType::Operator("/".to_string()), LexerState::Start),
                             '#' => add_token!(self, LexerState::Comment),
 
                             '"' => add_token!(self, LexerState::String, c ;),
@@ -151,10 +152,12 @@ pub mod lexer {
                 LexerState::String => {
                     // String
                     match c {
-                        '"' => add_token!(self, TokenType::String(self.curr_token.clone()), LexerState::Start),
+                        '"' => {
+                            self.curr_token.push(c);
+                            add_token!(self, TokenType::String(self.curr_token.clone()), LexerState::Start); 
+                        },
                         _ => {
                             self.curr_token.push(c);
-                            self.feed(c);
                         }
                     }
                 }
@@ -163,6 +166,26 @@ pub mod lexer {
                     match c {
                         '\n' => self.state = LexerState::Start,
                         _ => {}
+                    }
+                }
+                LexerState::Operator => {
+                    // Operator
+                    match c {
+                        '=' => { self.curr_token.push(c); }
+                        '+' => { self.curr_token.push(c); }
+                        '-' => { self.curr_token.push(c); }
+                        '*' => { self.curr_token.push(c); }
+                        '%' => { self.curr_token.push(c); }
+                        '!' => { self.curr_token.push(c); }
+                        '<' => { self.curr_token.push(c); }
+                        '>' => { self.curr_token.push(c); }
+                        '&' => { self.curr_token.push(c); }
+                        '|' => { self.curr_token.push(c); }
+                        _ => {
+                            add_token!(self, TokenType::Operator(self.curr_token.clone()), LexerState::Start);
+                            self.feed(c);
+                            self.curr_token.clear();
+                        }
                     }
                 }
                 LexerState::Error => {
@@ -191,5 +214,76 @@ pub mod lexer {
             }
         );
         lexer.tokens
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lexer::lexer::{TokenType, tokenize};
+
+    #[test]
+    fn lex_single_ident() {
+        let input = "abc;";
+        let tokens = tokenize(input);
+        assert_eq!(tokens.len(), 3);
+        assert_eq!(tokens[0].token_type, TokenType::Identifier("abc".to_string()));
+    }
+
+    #[test]
+    fn lex_single_number() {
+        let input = "123;";
+        let tokens = tokenize(input);
+        assert_eq!(tokens.len(), 3);
+        assert_eq!(tokens[0].token_type, TokenType::Number("123".to_string()));
+    }
+
+    #[test]
+    fn lex_single_string() {
+        let input = "\"abc\";";
+        let tokens = tokenize(input);
+        assert_eq!(tokens.len(), 3);
+        assert_eq!(tokens[0].token_type, TokenType::String("\"abc\"".to_string()));
+    }
+
+    #[test]
+    fn lex_single_comment() {
+        let input = "#abc";
+        let tokens = tokenize(input);
+        assert_eq!(tokens.len(), 1);
+    }
+
+    #[test]
+    fn lex_single_operator() {
+        let input = "=;";
+        let tokens = tokenize(input);
+        assert_eq!(tokens.len(), 3);
+        assert_eq!(tokens[0].token_type, TokenType::Operator("=".to_string()));
+    }
+
+    #[test]
+    fn lex_double_operator() {
+        let input = "==;";
+        let tokens = tokenize(input);
+        assert_eq!(tokens.len(), 3);
+        assert_eq!(tokens[0].token_type, TokenType::Operator("==".to_string()));
+    }
+
+    #[test]
+    fn lex_import_statement() {
+        let input = "import hello::world { print, println };";
+        let tokens = tokenize(input);
+        assert_eq!(tokens.len(), 12);
+
+        assert_eq!(tokens[0].token_type, TokenType::Identifier("import".to_string()), "Expected 'import' keyword");
+        assert_eq!(tokens[1].token_type, TokenType::Identifier("hello".to_string()), "Expected 'hello' identifier");
+        assert_eq!(tokens[2].token_type, TokenType::Separator(':'), "Expected ':' separator");
+        assert_eq!(tokens[3].token_type, TokenType::Separator(':'), "Expected second ':' separator");
+        assert_eq!(tokens[4].token_type, TokenType::Identifier("world".to_string()), "Expected 'world' identifier");
+        assert_eq!(tokens[5].token_type, TokenType::Brace('{'), "Expected '{{' brace");
+        assert_eq!(tokens[6].token_type, TokenType::Identifier("print".to_string()), "Expected 'print' identifier");
+        assert_eq!(tokens[7].token_type, TokenType::Separator(','), "Expected ',' separator");
+        assert_eq!(tokens[8].token_type, TokenType::Identifier("println".to_string()), "Expected 'println' identifier");
+        assert_eq!(tokens[9].token_type, TokenType::Brace('}'), "Expected '}}' brace");
+        assert_eq!(tokens[10].token_type, TokenType::Separator(';'), "Expected ';'");
     }
 }

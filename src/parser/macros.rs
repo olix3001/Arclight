@@ -30,3 +30,10 @@ macro_rules! try_parse {
         Err(format!("Could not parse any: {}", stringify!($( $expr )+)))
     })()}
 }
+
+#[macro_export]
+macro_rules! test_token {
+    ($token: expr) => {
+        crate::lexer::lexer::Token { token_type: $token, line: 1, column: 1 }
+    }
+}
