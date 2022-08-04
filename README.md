@@ -1,6 +1,6 @@
 # Arclight programming language
 
-![shield](https://img.shields.io/github/repo-size/olix3001/Arclight?style=flat-square) ![shield](https://img.shields.io/maintenance/yes/2022?style=flat-square) ![shield](https://img.shields.io/badge/supported%20platforms-Windows%20%7C%20MacOS%20%7C%20Linux-blue?style=flat-square)
+![shield](https://img.shields.io/github/repo-size/olix3001/Arclight?style=flat-square) ![shield](https://img.shields.io/maintenance/yes/2022?style=flat-square) ![shield](https://img.shields.io/badge/supported%20platforms-Windows%20%7C%20MacOS%20%7C%20Linux-blue?style=flat-square) ![shield](https://img.shields.io/github/workflow/status/olix3001/Arclight/Rust?label=tests&style=flat-square)
 
 :warning: **Warning:** Arclight currently does not work, It is only a language specification. I'm still working on creating a working compiler for It.
 
