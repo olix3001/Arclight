@@ -87,4 +87,23 @@ class MyClass extends OtherClass {
 ```
 
 Then this class can be passed for type `&OtherClass`.
-Same is true for interfaces.
+Same is true for interface
+
+### Extending classes
+
+Classes can be extended using `extend` keyword.
+
+```
+# ...
+class MyClass {
+    public fun hello() {
+        println("Hello");
+    }
+}
+
+extend MyClass {
+    public fun hello_world() {
+        println("Hello, world!");
+    }
+}
+```

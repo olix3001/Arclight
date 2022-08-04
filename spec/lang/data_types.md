@@ -8,18 +8,12 @@ Primitive types in Arclight are:
 -   i16 (16 bit integer)
 -   i32 (32 bit integer)
 -   i64 (64 bit integer)
--   f8 (8 bit floating point number)
--   f16 (16 bit floating point number)
 -   f32 (32 bit floating point number)
 -   f64 (64 bit floating point number)
 -   u8 (8 bit unsigned integer)
 -   u16 (16 bit unsigned integer)
 -   u32 (32 bit unsigned integer)
 -   u64 (64 bit unsigned integer)
--   uf8 (8 bit unsigned floating point number)
--   uf16 (16 bit unsigned floating point number)
--   uf32 (32 bit unsigned floating point number)
--   uf64 (64 bit unsigned floating point number)
 -   char (Single character)
 -   bool (true/false)
 -   str (String of characters in memory)
@@ -92,9 +86,9 @@ It is possible to convert between some of the types, using `value as type` notat
 ### String interpolation
 
 You can use `$` operator to identify a string literal as an interpolated string (simpler and cleaner than format).
+
 ```
 var option = 1;
 var name = "Name";
 var x = $"Hey {name}, you chose {option} option!";
 ```
-
