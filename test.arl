@@ -4,5 +4,5 @@ import hello::world;
 import hello::world { print, println };
 
 fun main(): i32 {
-    var hello: f64; # This is a comment :p
+    var hello: f64 = 5; # This is a comment :p
 }

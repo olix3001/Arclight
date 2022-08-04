@@ -57,6 +57,7 @@ pub mod block_expression;
 pub mod basic_expression;
 pub mod variable_definition_expression;
 pub mod value_expression;
+pub mod literal_expression;
 
 impl DataType {
     pub fn parse(token: &Token) -> Result<DataType, String> {
