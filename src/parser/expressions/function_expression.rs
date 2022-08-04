@@ -11,6 +11,7 @@ pub struct FunctionExpr {
     arguments: HashMap<String, DataType>,
     return_type: DataType,
     name: String,
+    is_vararg: bool,
     // TODO: Add generics
 }
 
@@ -89,14 +90,12 @@ impl Parseable for FunctionExpr {
             arguments,
             return_type,
             name,
+            is_vararg: false, // Add option for varargs
         }))
     }
 }
 
 impl ASTExpr for FunctionExpr {
-    fn generate(&self, builder: &mut Builder) -> () {
-        todo!();
-    }
     fn to_string(&self) -> String {
         let mut arguments = String::new();
         let mut kv = Vec::from_iter(self.arguments.keys());
@@ -107,6 +106,26 @@ impl ASTExpr for FunctionExpr {
 
         format!("Function ({}) => {:?} {}", arguments, self.return_type, self.body.to_string())
     }
+
+    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &Builder) -> () {
+        // Create sorted vector from arguments
+        let mut arguments: Vec<DataType> = Vec::new();
+        let mut kv = Vec::from_iter(self.arguments.keys());
+        kv.sort();
+        for &arg in kv.iter() {
+            arguments.push(self.arguments.get(arg).unwrap().clone());
+        }
+        // Create function type
+        let f_type = self.return_type.into_fn_type(context, arguments, self.is_vararg);
+        // Create function
+        let function = module.add_function(self.name.as_str(), f_type, None);
+
+        // Create basic block
+        let entry_block = context.append_basic_block(function, &format!("entry"));
+        builder.position_at_end(entry_block);
+        self.body.generate(context, module, builder);
+    }
+    
 }
 
 

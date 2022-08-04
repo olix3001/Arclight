@@ -1,7 +1,11 @@
 use std::{fs::File, io::{BufReader, Read}};
 
+use compiler::compiler::Compiler;
+use inkwell::context::Context;
+
 mod lexer;
 mod parser;
+mod compiler;
 
 fn main() {
     let mut f = File::open("test.arl").unwrap();
@@ -20,4 +24,9 @@ fn main() {
     for a in ast.iter() {
         println!("{}", a.to_string());
     }
+
+    let context = Context::create();
+    let module = context.create_module("test");
+    let compiler = Compiler::new(&context, module);
+    compiler.compile(ast);
 }

@@ -28,7 +28,7 @@ pub struct IntegerLiteralExpr {
 }
 
 impl Parseable for IntegerLiteralExpr {
-    // TODO: Support more types
+    // TODO: Support more types (refactor this code)
     fn parse(tokens: &Vec<Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, String> {
         match &tokens[*pos].token_type {
             TokenType::Number(value) => {
@@ -50,12 +50,12 @@ impl Parseable for IntegerLiteralExpr {
 }
 
 impl ASTExpr for IntegerLiteralExpr {
-    fn generate(&self, builder: &mut inkwell::builder::Builder) -> () {
-        todo!()
-    }
-
     fn to_string(&self) -> String {
         format!("{:?}", self.value)
+    }
+
+    fn generate(&self, context: &inkwell::context::Context, module: &inkwell::module::Module, builder: &inkwell::builder::Builder) -> () {
+        todo!()
     }
 }
 

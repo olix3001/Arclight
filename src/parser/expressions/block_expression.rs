@@ -28,11 +28,16 @@ impl Parseable for BlockExpr {
 }
 
 impl ASTExpr for BlockExpr {
-    fn generate(&self, builder: &mut inkwell::builder::Builder) -> () {
-        todo!()
-    }
 
     fn to_string(&self) -> String {
         format!("{{\n {} \n}}", self.statements.iter().map(|s| s.to_string()).collect::<Vec<String>>().join("\n"))
     }
+
+    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &inkwell::builder::Builder) -> () {
+        for statement in &self.statements {
+            statement.generate(context, module, builder);
+        }
+    }
+
+    
 }

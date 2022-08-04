@@ -90,14 +90,15 @@ impl Parseable for ImportExpr {
     }
 }
 
-impl ASTExpr for ImportExpr {
-    fn generate(&self, builder: &mut Builder) -> () {
-        todo!()
-    }
-    
+impl ASTExpr for ImportExpr {    
     fn to_string(&self) -> String {
         return format!("Import {} {{ {} }}", self.path.join("::"), self.imports.join(", ")); 
     }
+
+    fn generate(&self, context: &inkwell::context::Context, module: &inkwell::module::Module, builder: &Builder) -> () {
+        todo!()
+    }
+    
 }
 
 

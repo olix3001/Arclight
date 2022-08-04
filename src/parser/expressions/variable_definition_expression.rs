@@ -1,3 +1,5 @@
+use inkwell::builder;
+
 use crate::{lexer::lexer::TokenType, parser_error, parser::expressions::value_expression::ValueExpr};
 
 use super::{ASTExpr, Parseable, DataType, VoidExpr, basic_expression::BasicExpr};
@@ -79,16 +81,16 @@ impl Parseable for VarDefExpr {
 }
 
 impl ASTExpr for VarDefExpr {
-    fn generate(&self, builder: &mut inkwell::builder::Builder) -> () {
-        todo!()
-    }
-
     fn to_string(&self) -> String {
         if self.is_defined {
             format!("Var {:?} {} = {}", self.data_type, self.name, self.value.to_string())
         } else {
             format!("Var {:?} {}", self.data_type, self.name)
         }
+    }
+
+    fn generate(&self, context: &inkwell::context::Context, module: &inkwell::module::Module, builder: &builder::Builder) -> () {
+        todo!()
     }
 }
 
