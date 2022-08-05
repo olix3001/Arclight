@@ -4,11 +4,11 @@ use inkwell::{builder::Builder};
 
 use crate::{lexer::lexer::TokenType, parser_error};
 
-use super::{ASTExpr, Parseable, VoidExpr, basic_expression::BasicExpr, data_types::DataType};
+use super::{ASTExpr, Parseable, VoidExpr, basic_expression::BasicExpr, data_types::DataType, Scope};
 
 pub struct FunctionExpr {
     body: Box<dyn ASTExpr>,
-    arguments: HashMap<String, DataType>,
+    arguments: Vec<(String, DataType)>,
     return_type: DataType,
     name: String,
     is_vararg: bool,
@@ -17,7 +17,7 @@ pub struct FunctionExpr {
 
 impl Parseable for FunctionExpr {
     fn parse(tokens: &Vec<crate::lexer::lexer::Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, String> {
-        let mut arguments: HashMap<String, DataType> = HashMap::new();
+        let mut arguments: Vec<(String, DataType)> = Vec::new();
         let mut return_type: DataType = DataType::Void;
         let mut body: Box<dyn ASTExpr> = Box::new(VoidExpr {});
         let mut name: String = String::new();
@@ -55,7 +55,7 @@ impl Parseable for FunctionExpr {
                     *pos += 1;
                     let data_type = DataType::parse(&tokens[*pos])?;
                     *pos += 1;
-                    arguments.insert(s.clone(), data_type);
+                    arguments.push((s.clone(), data_type));
                 },
                 _ => parser_error!(format!("Expected argument name, found {:?}", tokens[*pos]))
             }
@@ -98,22 +98,18 @@ impl Parseable for FunctionExpr {
 impl ASTExpr for FunctionExpr {
     fn to_string(&self) -> String {
         let mut arguments = String::new();
-        let mut kv = Vec::from_iter(self.arguments.keys());
-        kv.sort();
-        for arg in kv.iter() {
-            arguments.push_str(&format!("{}: {:?}, ", arg, self.arguments.get(arg as &str).unwrap()));
+        for arg in self.arguments.iter() {
+            arguments.push_str(&format!("{}: {:?}, ", arg.0, arg.1));
         }
 
         format!("Function ({}) => {:?} {}", arguments, self.return_type, self.body.to_string())
     }
 
-    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &Builder<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
+    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &Builder<'a>, scope: Option<&Scope>) -> Option<inkwell::values::AnyValueEnum<'a>> {
         // Create sorted vector from arguments
         let mut arguments: Vec<DataType> = Vec::new();
-        let mut kv = Vec::from_iter(self.arguments.keys());
-        kv.sort();
-        for &arg in kv.iter() {
-            arguments.push(self.arguments.get(arg).unwrap().clone());
+        for arg in self.arguments.iter() {
+            arguments.push(arg.1.clone());
         }
         // Create function type
         let f_type = self.return_type.into_fn_type(context, arguments, self.is_vararg);
@@ -121,9 +117,9 @@ impl ASTExpr for FunctionExpr {
         let function = module.add_function(self.name.as_str(), f_type, None);
 
         // Create basic block
-        let entry_block = context.append_basic_block(function, &format!("entry"));
+        let entry_block = context.append_basic_block(function, "entry");
         builder.position_at_end(entry_block);
-        self.body.generate(context, module, builder);
+        self.body.generate(context, module, builder, Some(&Scope::from_scope(scope.unwrap(), Some(&function), Some(&entry_block))));
         return Some(inkwell::values::AnyValueEnum::FunctionValue(function));
     }
     

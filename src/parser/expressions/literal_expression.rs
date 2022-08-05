@@ -4,7 +4,7 @@ use inkwell::values::AnyValueEnum;
 
 use crate::{lexer::lexer::{TokenType, Token}, try_parse};
 
-use super::{ASTExpr, Parseable};
+use super::{ASTExpr, Parseable, Scope};
 
 pub struct LiteralExpr {}
 impl Parseable for LiteralExpr {
@@ -32,7 +32,7 @@ pub struct IntegerLiteralExpr {
 }
 
 impl Parseable for IntegerLiteralExpr {
-    // TODO: Support more types (refactor this code)
+    // TODO: Support more types and negative values (refactor this code)
     fn parse(tokens: &Vec<Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, String> {
         match &tokens[*pos].token_type {
             TokenType::Number(value) => {
@@ -58,7 +58,7 @@ impl ASTExpr for IntegerLiteralExpr {
         format!("{:?}", self.value)
     }
 
-    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &inkwell::builder::Builder) -> Option<inkwell::values::AnyValueEnum<'a>> {
+    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &inkwell::builder::Builder, scope: Option<&Scope>) -> Option<inkwell::values::AnyValueEnum<'a>> {
         match self.value {
             NumberValue::I8(value) => Some(AnyValueEnum::IntValue(context.i8_type().const_int(value as u64, true))),
             NumberValue::I16(value) => Some(AnyValueEnum::IntValue(context.i16_type().const_int(value as u64, true))),
