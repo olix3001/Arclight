@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use inkwell::builder::Builder;
+use inkwell::{builder::Builder};
 
 use crate::{lexer::lexer::TokenType, parser_error};
 
-use super::{ASTExpr, DataType, Parseable, VoidExpr, basic_expression::BasicExpr};
+use super::{ASTExpr, Parseable, VoidExpr, basic_expression::BasicExpr, data_types::DataType};
 
 pub struct FunctionExpr {
     body: Box<dyn ASTExpr>,
@@ -107,7 +107,7 @@ impl ASTExpr for FunctionExpr {
         format!("Function ({}) => {:?} {}", arguments, self.return_type, self.body.to_string())
     }
 
-    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &Builder) -> () {
+    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &Builder) -> Option<inkwell::values::AnyValueEnum<'a>> {
         // Create sorted vector from arguments
         let mut arguments: Vec<DataType> = Vec::new();
         let mut kv = Vec::from_iter(self.arguments.keys());
@@ -124,6 +124,7 @@ impl ASTExpr for FunctionExpr {
         let entry_block = context.append_basic_block(function, &format!("entry"));
         builder.position_at_end(entry_block);
         self.body.generate(context, module, builder);
+        return Some(inkwell::values::AnyValueEnum::FunctionValue(function));
     }
     
 }
@@ -132,9 +133,7 @@ impl ASTExpr for FunctionExpr {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
-    use crate::{lexer::lexer::TokenType, test_token, parser::expressions::{Parseable, DataType}};
+    use crate::{lexer::lexer::TokenType, test_token, parser::expressions::{Parseable}};
 
 
     #[test]

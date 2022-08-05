@@ -95,7 +95,7 @@ impl ASTExpr for ImportExpr {
         return format!("Import {} {{ {} }}", self.path.join("::"), self.imports.join(", ")); 
     }
 
-    fn generate(&self, context: &inkwell::context::Context, module: &inkwell::module::Module, builder: &Builder) -> () {
+    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &Builder) -> Option<inkwell::values::AnyValueEnum<'a>> {
         todo!()
     }
     

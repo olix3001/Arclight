@@ -1,6 +1,6 @@
 use crate::{lexer::lexer::{TokenType, Token}, try_parse};
 
-use super::{ASTExpr, Parseable, DataType};
+use super::{ASTExpr, Parseable};
 
 pub struct LiteralExpr {}
 impl Parseable for LiteralExpr {
@@ -54,7 +54,7 @@ impl ASTExpr for IntegerLiteralExpr {
         format!("{:?}", self.value)
     }
 
-    fn generate(&self, context: &inkwell::context::Context, module: &inkwell::module::Module, builder: &inkwell::builder::Builder) -> () {
+    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &inkwell::builder::Builder) -> Option<inkwell::values::AnyValueEnum<'a>> {
         todo!()
     }
 }

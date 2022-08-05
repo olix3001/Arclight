@@ -2,7 +2,7 @@ use inkwell::builder;
 
 use crate::{lexer::lexer::TokenType, parser_error, parser::expressions::value_expression::ValueExpr};
 
-use super::{ASTExpr, Parseable, DataType, VoidExpr, basic_expression::BasicExpr};
+use super::{ASTExpr, Parseable, VoidExpr, basic_expression::BasicExpr, data_types::DataType};
 
 pub struct VarDefExpr {
     name: String,
@@ -89,7 +89,7 @@ impl ASTExpr for VarDefExpr {
         }
     }
 
-    fn generate(&self, context: &inkwell::context::Context, module: &inkwell::module::Module, builder: &builder::Builder) -> () {
+    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &builder::Builder) -> Option<inkwell::values::AnyValueEnum<'a>> {
         todo!()
     }
 }
