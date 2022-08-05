@@ -33,7 +33,7 @@ impl ASTExpr for BlockExpr {
         format!("{{\n {} \n}}", self.statements.iter().map(|s| s.to_string()).collect::<Vec<String>>().join("\n"))
     }
 
-    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &inkwell::builder::Builder) -> Option<inkwell::values::AnyValueEnum<'a>> {
+    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &inkwell::builder::Builder<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
         for statement in &self.statements {
             statement.generate(context, module, builder);
         }

@@ -1,14 +1,15 @@
-use inkwell::builder;
+use inkwell::{builder, values::{AnyValueEnum}};
 
 use crate::{lexer::lexer::TokenType, parser_error, parser::expressions::value_expression::ValueExpr};
 
-use super::{ASTExpr, Parseable, VoidExpr, basic_expression::BasicExpr, data_types::DataType};
+use super::{ASTExpr, Parseable, VoidExpr, basic_expression::BasicExpr, data_types::{DataType, ToBasic}};
 
 pub struct VarDefExpr {
     name: String,
     data_type: DataType,
     is_defined: bool,
     value: Box<dyn ASTExpr>,
+    is_mutable: bool,
 }
 
 impl Parseable for VarDefExpr {
@@ -60,7 +61,8 @@ impl Parseable for VarDefExpr {
                 name,
                 data_type: var_type.unwrap(),
                 is_defined: false,
-                value: Box::new(VoidExpr {})
+                value: Box::new(VoidExpr {}),
+                is_mutable: true,
             }));
         }
         
@@ -72,7 +74,8 @@ impl Parseable for VarDefExpr {
                     name,
                     data_type: var_type.unwrap(),
                     is_defined: true,
-                    value: v
+                    value: v,
+                    is_mutable: true,
                 }))
             }
             Err(e) => parser_error!(tokens[*pos], "Could not parse value")
@@ -89,8 +92,25 @@ impl ASTExpr for VarDefExpr {
         }
     }
 
-    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &builder::Builder) -> Option<inkwell::values::AnyValueEnum<'a>> {
-        todo!()
+    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &builder::Builder<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
+        if self.is_mutable {
+            // Create alloca
+            let alloca = builder.build_alloca(self.data_type.into_basic_type(context), &self.name);
+            // Store value if defined
+            if self.is_defined {
+                let value = self.value.generate(context, module, builder);
+                builder.build_store(alloca, value.unwrap().to_basic());
+            }
+            // Return alloca
+            Some(AnyValueEnum::PointerValue(alloca))
+        } else {
+            // Return value if defined
+            if self.is_defined {
+                self.value.generate(context, module, builder)
+            } else {
+                panic!("Variable '{}' is immutable and is not defined", self.name)
+            }
+        }
     }
 }
 

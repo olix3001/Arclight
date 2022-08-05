@@ -3,7 +3,7 @@ use inkwell::{builder::Builder, module::Module, context::Context };
 use crate::lexer::lexer::{Token, TokenType};
 
 pub trait ASTExpr {
-    fn generate<'a>(&self, context: &'a Context, module: &Module<'a>, builder: &Builder) -> Option<inkwell::values::AnyValueEnum<'a>>;
+    fn generate<'a>(&self, context: &'a Context, module: &Module<'a>, builder: &Builder<'a>) -> Option<inkwell::values::AnyValueEnum<'a>>;
     fn to_string(&self) -> String;
 }
 
@@ -14,7 +14,7 @@ pub trait Parseable {
 
 pub struct VoidExpr {}
 impl ASTExpr for VoidExpr {
-    fn generate<'a>(&self, context: &'a Context, module: &Module<'a>, builder: &Builder) -> Option<inkwell::values::AnyValueEnum<'a>> {
+    fn generate<'a>(&self, context: &'a Context, module: &Module<'a>, builder: &Builder<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
         return None;
     }
     fn to_string(&self) -> String {

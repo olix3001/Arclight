@@ -107,7 +107,7 @@ impl ASTExpr for FunctionExpr {
         format!("Function ({}) => {:?} {}", arguments, self.return_type, self.body.to_string())
     }
 
-    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &Builder) -> Option<inkwell::values::AnyValueEnum<'a>> {
+    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &Builder<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
         // Create sorted vector from arguments
         let mut arguments: Vec<DataType> = Vec::new();
         let mut kv = Vec::from_iter(self.arguments.keys());

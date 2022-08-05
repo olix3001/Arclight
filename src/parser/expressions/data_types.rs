@@ -1,4 +1,4 @@
-use inkwell::{context::Context, types::{AnyTypeEnum, BasicTypeEnum, BasicMetadataTypeEnum, FunctionType}};
+use inkwell::{context::Context, types::{AnyTypeEnum, BasicTypeEnum, BasicMetadataTypeEnum, FunctionType}, values::{AnyValueEnum, BasicValueEnum}};
 
 use crate::lexer::lexer::{Token, TokenType};
 
@@ -141,6 +141,23 @@ impl DataType {
             AnyTypeEnum::PointerType(t) => t.fn_type(types.as_slice(), isVarArgs),
             AnyTypeEnum::VoidType(t) => t.fn_type(types.as_slice(), isVarArgs),
             _ => panic!("Unknown type") // TODO: Make this more meaningful
+        }
+    }
+}
+
+pub trait ToBasic {
+    fn to_basic(&self) -> BasicValueEnum;
+}
+
+impl<'ctx> ToBasic for AnyValueEnum<'ctx> {
+    fn to_basic(&self) -> BasicValueEnum {
+        match self {
+            AnyValueEnum::IntValue(v) => BasicValueEnum::IntValue(*v),
+            AnyValueEnum::FloatValue(v) => BasicValueEnum::FloatValue(*v),
+            AnyValueEnum::PointerValue(v) => BasicValueEnum::PointerValue(*v),
+            AnyValueEnum::StructValue(v) => BasicValueEnum::StructValue(*v),
+            AnyValueEnum::VectorValue(v) => BasicValueEnum::VectorValue(*v),
+            _ => panic!("Cannot convert {:?} to BasicValue", self) // TODO: Make this more meaningful
         }
     }
 }

@@ -1,3 +1,7 @@
+use std::sync::Arc;
+
+use inkwell::values::AnyValueEnum;
+
 use crate::{lexer::lexer::{TokenType, Token}, try_parse};
 
 use super::{ASTExpr, Parseable};
@@ -55,7 +59,18 @@ impl ASTExpr for IntegerLiteralExpr {
     }
 
     fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &inkwell::builder::Builder) -> Option<inkwell::values::AnyValueEnum<'a>> {
-        todo!()
+        match self.value {
+            NumberValue::I8(value) => Some(AnyValueEnum::IntValue(context.i8_type().const_int(value as u64, true))),
+            NumberValue::I16(value) => Some(AnyValueEnum::IntValue(context.i16_type().const_int(value as u64, true))),
+            NumberValue::I32(value) => Some(AnyValueEnum::IntValue(context.i32_type().const_int(value as u64, true))),
+            NumberValue::I64(value) => Some(AnyValueEnum::IntValue(context.i64_type().const_int(value as u64, true))),
+            NumberValue::U8(value) => Some(AnyValueEnum::IntValue(context.i8_type().const_int(value as u64, false))),
+            NumberValue::U16(value) => Some(AnyValueEnum::IntValue(context.i16_type().const_int(value as u64, false))),
+            NumberValue::U32(value) => Some(AnyValueEnum::IntValue(context.i32_type().const_int(value as u64, false))),
+            NumberValue::U64(value) => Some(AnyValueEnum::IntValue(context.i64_type().const_int(value as u64, false))),
+            NumberValue::F32(value) => Some(AnyValueEnum::FloatValue(context.f32_type().const_float(value as f64))),
+            NumberValue::F64(value) => Some(AnyValueEnum::FloatValue(context.f64_type().const_float(value))),
+        }
     }
 }
 
