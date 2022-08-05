@@ -161,3 +161,20 @@ impl<'ctx> ToBasic for AnyValueEnum<'ctx> {
         }
     }
 }
+
+pub trait ToAny {
+    fn to_any(&self) -> AnyValueEnum;
+}
+
+impl<'ctx> ToAny for BasicValueEnum<'ctx> {
+    fn to_any(&self) -> AnyValueEnum {
+        match self {
+            BasicValueEnum::IntValue(v) => AnyValueEnum::IntValue(*v),
+            BasicValueEnum::FloatValue(v) => AnyValueEnum::FloatValue(*v),
+            BasicValueEnum::PointerValue(v) => AnyValueEnum::PointerValue(*v),
+            BasicValueEnum::StructValue(v) => AnyValueEnum::StructValue(*v),
+            BasicValueEnum::VectorValue(v) => AnyValueEnum::VectorValue(*v),
+            _ => panic!("Cannot convert {:?} to AnyValue", self) // TODO: Make this more meaningful
+        }
+    }
+}

@@ -2,7 +2,7 @@ use inkwell::builder::Builder;
 
 use crate::{lexer::lexer::{Token, TokenType}, parser_error};
 
-use super::{ASTExpr, Parseable, Scope};
+use super::{ASTExpr, Parseable};
 
 #[derive(Debug)]
 pub struct ImportExpr {
@@ -95,7 +95,7 @@ impl ASTExpr for ImportExpr {
         return format!("Import {} {{ {} }}", self.path.join("::"), self.imports.join(", ")); 
     }
 
-    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &Builder, scope: Option<&Scope>) -> Option<inkwell::values::AnyValueEnum<'a>> {
+    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &Builder) -> Option<inkwell::values::AnyValueEnum<'a>> {
         todo!()
     }
     

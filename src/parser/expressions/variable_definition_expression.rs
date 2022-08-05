@@ -2,7 +2,7 @@ use inkwell::{builder, values::{AnyValueEnum}};
 
 use crate::{lexer::lexer::TokenType, parser_error, parser::expressions::value_expression::ValueExpr};
 
-use super::{ASTExpr, Parseable, VoidExpr, basic_expression::BasicExpr, data_types::{DataType, ToBasic}, Scope};
+use super::{ASTExpr, Parseable, VoidExpr, data_types::{DataType, ToBasic}};
 
 pub struct VarDefExpr {
     name: String,
@@ -92,13 +92,13 @@ impl ASTExpr for VarDefExpr {
         }
     }
 
-    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &builder::Builder<'a>, scope: Option<&Scope>) -> Option<inkwell::values::AnyValueEnum<'a>> {
+    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &builder::Builder<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
         if self.is_mutable {
             // Create alloca
             let alloca = builder.build_alloca(self.data_type.into_basic_type(context), &self.name);
             // Store value if defined
             if self.is_defined {
-                let value = self.value.generate(context, module, builder, scope);
+                let value = self.value.generate(context, module, builder);
                 builder.build_store(alloca, value.unwrap().to_basic());
             }
             // Return alloca
@@ -106,7 +106,7 @@ impl ASTExpr for VarDefExpr {
         } else {
             // Return value if defined
             if self.is_defined {
-                self.value.generate(context, module, builder, scope)
+                self.value.generate(context, module, builder)
             } else {
                 panic!("Variable '{}' is immutable and is not defined", self.name)
             }

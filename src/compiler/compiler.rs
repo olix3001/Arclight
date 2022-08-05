@@ -1,6 +1,6 @@
 use inkwell::{context::Context, module::Module};
 
-use crate::parser::expressions::{ASTExpr, Scope};
+use crate::parser::expressions::{ASTExpr};
 
 pub struct Compiler<'ctx> {
     context: &'ctx Context,
@@ -21,9 +21,8 @@ impl<'ctx> Compiler<'ctx> {
         let builder = self.context.create_builder();
 
         // Go through AST and compile each expression
-        let global_scope = Scope::new();
         for expr in ast {
-            expr.generate(self.context, &self.module, &builder, Some(&global_scope));
+            expr.generate(self.context, &self.module, &builder); 
         }
 
         // Print generated llvm

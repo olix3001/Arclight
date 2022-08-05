@@ -1,6 +1,6 @@
 use crate::lexer::lexer::TokenType;
 
-use super::{Parseable, ASTExpr, basic_expression::BasicExpr, function_expression::FunctionExpr, Scope};
+use super::{Parseable, ASTExpr, basic_expression::BasicExpr, function_expression::FunctionExpr};
 
 pub struct BlockExpr {
     statements: Vec<Box<dyn ASTExpr>>,
@@ -33,18 +33,18 @@ impl ASTExpr for BlockExpr {
         format!("{{\n {} \n}}", self.statements.iter().map(|s| s.to_string()).collect::<Vec<String>>().join("\n"))
     }
 
-    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &inkwell::builder::Builder<'a>, scope: Option<&Scope>) -> Option<inkwell::values::AnyValueEnum<'a>> {
-        let block_block = context.append_basic_block(*scope.unwrap().get_current_function().unwrap(), "code_block");
-        builder.build_unconditional_branch(block_block);
-        builder.position_at_end(block_block);
+    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &inkwell::builder::Builder<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
+        // let block_block = context.append_basic_block(*scope.unwrap().get_current_function().unwrap().to_owned(), "code_block");
+        // builder.build_unconditional_branch(block_block );
+        // builder.position_at_end(block_block);
 
         for statement in &self.statements {
-            statement.generate(context, module, builder, scope);
+            statement.generate(context, module, builder);
         }
 
-        let after_block = context.append_basic_block(*scope.unwrap().get_current_function().unwrap(), "after_block");
-        builder.build_unconditional_branch(after_block);
-        builder.position_at_end(after_block);
+        // let after_block = context.append_basic_block(*scope.unwrap().get_current_function().unwrap().to_owned(), "after_block");
+        // builder.build_unconditional_branch(after_block);
+        // builder.position_at_end(after_block);
         return None;
     }
 
