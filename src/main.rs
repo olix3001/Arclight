@@ -1,4 +1,4 @@
-use std::{fs::File, io::{BufReader, Read}};
+use std::{fs::File, io::Read};
 
 use compiler::compiler::Compiler;
 use inkwell::context::Context;
