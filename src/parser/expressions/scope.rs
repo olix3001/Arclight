@@ -1,24 +1,27 @@
 use std::collections::HashMap;
+use std::rc::Rc;
 
 use inkwell::values::{PointerValue, FunctionValue};
 use inkwell::basic_block::BasicBlock;
 
-#[derive(Debug, Clone)]
-pub struct Scope<'a, 'b> {
-    pub variables: HashMap<String, PointerValue<'a>>,
-    pub functions: HashMap<String, FunctionValue<'b>>,
+#[derive(Debug)]
+pub struct Scope<'a> {
+    pub variables: HashMap<String, Rc<PointerValue<'a>>>,
+    pub functions: HashMap<String, Rc<FunctionValue<'a>>>,
+    pub function: Option<Rc<FunctionValue<'a>>>,
+    pub block: Option<Rc<BasicBlock<'a>>>
 }
 
 #[derive(Debug)]
-pub struct ScopeManager<'a, 'b> {
-    pub scope: Scope<'a, 'b>,
-    scopes: Vec<Box<Scope<'a, 'b>>>,
+pub struct ScopeManager<'a> {
+    pub scope: Scope<'a>,
+    scopes: Vec<Box<Scope<'a>>>,
     pub function: Option<&'a FunctionValue<'a>>,
     pub block: Option<&'a BasicBlock<'a>>,
 }
 
-impl<'a, 'b> ScopeManager<'a, 'b> {
-    pub fn new() -> ScopeManager<'a, 'b> {
+impl<'a> ScopeManager<'a> {
+    pub fn new() -> ScopeManager<'a> {
         let mut global = Scope::new();
         ScopeManager {
             scope: global,
@@ -39,18 +42,22 @@ impl<'a, 'b> ScopeManager<'a, 'b> {
     }
 }
 
-impl<'a, 'b> Scope<'a, 'b> {
-    pub fn new() -> Scope<'a, 'b> {
+impl<'a> Scope<'a> {
+    pub fn new() -> Scope<'a> {
         Scope {
             variables: HashMap::new(),
             functions: HashMap::new(),
+            function: None,
+            block: None,
         }
     }
 
-    pub fn extend(&self) -> Scope<'a, 'b> {
+    pub fn extend(&self) -> Scope<'a> {
         Scope {
             variables: self.variables.clone(),
             functions: self.functions.clone(),
+            function: None,
+            block: None
         }
     }
 }

@@ -169,11 +169,11 @@ pub trait ToAny {
 impl<'ctx> ToAny for BasicValueEnum<'ctx> {
     fn to_any(&self) -> AnyValueEnum {
         match self {
-            BasicValueEnum::IntValue(v) => AnyValueEnum::IntValue(*v),
-            BasicValueEnum::FloatValue(v) => AnyValueEnum::FloatValue(*v),
-            BasicValueEnum::PointerValue(v) => AnyValueEnum::PointerValue(*v),
-            BasicValueEnum::StructValue(v) => AnyValueEnum::StructValue(*v),
-            BasicValueEnum::VectorValue(v) => AnyValueEnum::VectorValue(*v),
+            BasicValueEnum::IntValue(v) => AnyValueEnum::IntValue(v.clone()),
+            BasicValueEnum::FloatValue(v) => AnyValueEnum::FloatValue(v.clone()),
+            BasicValueEnum::PointerValue(v) => AnyValueEnum::PointerValue(v.clone()),
+            BasicValueEnum::StructValue(v) => AnyValueEnum::StructValue(v.clone()),
+            BasicValueEnum::VectorValue(v) => AnyValueEnum::VectorValue(v.clone()),
             _ => panic!("Cannot convert {:?} to AnyValue", self) // TODO: Make this more meaningful
         }
     }

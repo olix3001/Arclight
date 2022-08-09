@@ -2,10 +2,11 @@ use inkwell::{builder::Builder, module::Module, context::Context, values::AnyVal
 
 use crate::lexer::lexer::{Token, TokenType};
 
-use self::function_expression::FunctionExpr;
+use self::{function_expression::FunctionExpr, scope::ScopeManager};
+pub mod scope;
 
 pub trait ASTExpr {
-    fn generate<'a>(&self, context: &'a Context, module: &Module<'a>, builder: &Builder<'a>) -> Option<inkwell::values::AnyValueEnum<'a>>;
+    fn generate<'a, 'b>(&self, context: &'a Context, module: &Module<'a>, builder: &Builder<'a>, scope_manager: &'b mut ScopeManager<'a>) -> Option<inkwell::values::AnyValueEnum<'a>>;
     fn to_string(&self) -> String;
 }
 
@@ -16,7 +17,7 @@ pub trait Parseable {
 
 pub struct VoidExpr {}
 impl ASTExpr for VoidExpr {
-    fn generate<'a>(&self, context: &'a Context, module: &Module<'a>, builder: &Builder<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
+    fn generate<'a, 'b>(&self, context: &'a Context, module: &Module<'a>, builder: &Builder<'a>, sm: &'b mut ScopeManager<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
         return None;
     }
     fn to_string(&self) -> String {
@@ -37,3 +38,4 @@ pub mod variable_definition_expression;
 pub mod value_expression;
 pub mod literal_expression;
 pub mod data_types;
+pub mod variable_expression;

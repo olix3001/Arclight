@@ -1,6 +1,6 @@
 use crate::lexer::lexer::TokenType;
 
-use super::{Parseable, ASTExpr, basic_expression::BasicExpr, function_expression::FunctionExpr};
+use super::{Parseable, ASTExpr, basic_expression::BasicExpr, function_expression::FunctionExpr, scope::ScopeManager};
 
 pub struct BlockExpr {
     statements: Vec<Box<dyn ASTExpr>>,
@@ -33,16 +33,19 @@ impl ASTExpr for BlockExpr {
         format!("{{\n {} \n}}", self.statements.iter().map(|s| s.to_string()).collect::<Vec<String>>().join("\n"))
     }
 
-    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &inkwell::builder::Builder<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
-        // let block_block = context.append_basic_block(*scope.unwrap().get_current_function().unwrap().to_owned(), "code_block");
+    fn generate<'a, 'b>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &inkwell::builder::Builder<'a>, scope_manager: &'b mut ScopeManager<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
+        // let function = sm.function.as_ref().unwrap();
+        // let block_block = context.append_basic_block(**function, "code_block");
         // builder.build_unconditional_branch(block_block );
         // builder.position_at_end(block_block);
 
+        scope_manager.create_scope();
         for statement in &self.statements {
-            statement.generate(context, module, builder);
+            statement.generate(context, module, builder, scope_manager);
         }
+        scope_manager.exit_scope();
 
-        // let after_block = context.append_basic_block(*scope.unwrap().get_current_function().unwrap().to_owned(), "after_block");
+        // let after_block = context.append_basic_block(**function, "after_block");
         // builder.build_unconditional_branch(after_block);
         // builder.position_at_end(after_block);
         return None;

@@ -4,7 +4,7 @@ use inkwell::{builder::Builder};
 
 use crate::{lexer::lexer::TokenType, parser_error};
 
-use super::{ASTExpr, Parseable, VoidExpr, basic_expression::BasicExpr, data_types::DataType};
+use super::{ASTExpr, Parseable, VoidExpr, basic_expression::BasicExpr, data_types::DataType, scope::ScopeManager};
 
 pub struct FunctionExpr {
     body: Box<dyn ASTExpr>,
@@ -105,7 +105,7 @@ impl ASTExpr for FunctionExpr {
         format!("Function ({}) => {:?} {}", arguments, self.return_type, self.body.to_string())
     }
 
-    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &Builder<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
+    fn generate<'a, 'b>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &Builder<'a>, scope_manager: &'b mut ScopeManager<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
         // Create sorted vector from arguments
         let mut arguments: Vec<DataType> = Vec::new();
         for arg in self.arguments.iter() {
@@ -119,7 +119,7 @@ impl ASTExpr for FunctionExpr {
         // Create basic block
         let entry_block = context.append_basic_block(function, "entry");
         builder.position_at_end(entry_block);
-        self.body.generate(context, module, builder);
+        self.body.generate(context, module, builder, scope_manager);
         return Some(inkwell::values::AnyValueEnum::FunctionValue(function));
     }
     

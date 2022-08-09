@@ -1,8 +1,10 @@
+use std::{rc::Rc};
+
 use inkwell::{builder, values::{AnyValueEnum}};
 
 use crate::{lexer::lexer::TokenType, parser_error, parser::expressions::value_expression::ValueExpr};
 
-use super::{ASTExpr, Parseable, VoidExpr, data_types::{DataType, ToBasic}};
+use super::{ASTExpr, Parseable, VoidExpr, data_types::{DataType, ToBasic}, scope::ScopeManager};
 
 pub struct VarDefExpr {
     name: String,
@@ -92,21 +94,23 @@ impl ASTExpr for VarDefExpr {
         }
     }
 
-    fn generate<'a>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &builder::Builder<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
+    fn generate<'a, 'b>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &builder::Builder<'a>, scope_manager: &'b mut ScopeManager<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
         if self.is_mutable {
             // Create alloca
             let alloca = builder.build_alloca(self.data_type.into_basic_type(context), &self.name);
             // Store value if defined
             if self.is_defined {
-                let value = self.value.generate(context, module, builder);
+                let value = self.value.generate(context, module, builder, scope_manager);
                 builder.build_store(alloca, value.unwrap().to_basic());
             }
-            // Return alloca
+            // Add alloca to variables
+            scope_manager.scope.variables.insert(self.name.to_string(), Rc::new(alloca));
+            // Return alloca 
             Some(AnyValueEnum::PointerValue(alloca))
         } else {
             // Return value if defined
             if self.is_defined {
-                self.value.generate(context, module, builder)
+                self.value.generate(context, module, builder, scope_manager)
             } else {
                 panic!("Variable '{}' is immutable and is not defined", self.name)
             }
