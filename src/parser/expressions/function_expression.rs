@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-
+use std::rc::Rc;
 use inkwell::{builder::Builder};
 
 use crate::{lexer::lexer::TokenType, parser_error};
@@ -119,7 +119,17 @@ impl ASTExpr for FunctionExpr {
         // Create basic block
         let entry_block = context.append_basic_block(function, "entry");
         builder.position_at_end(entry_block);
+        // Create function scope
+        scope_manager.create_scope();
+        scope_manager.scope.function = Some(Rc::new(function));
+        // Insert function arguments into fn_args
+        for (i, arg) in self.arguments.iter().enumerate() {
+            scope_manager.scope.fn_args.insert(arg.0.to_string(), Rc::new(function.get_nth_param(i as u32).unwrap()));
+        }
+        // Generate function code
         self.body.generate(context, module, builder, scope_manager);
+        // Exit function scope
+        scope_manager.exit_scope();
         return Some(inkwell::values::AnyValueEnum::FunctionValue(function));
     }
     

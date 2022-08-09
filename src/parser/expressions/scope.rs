@@ -1,13 +1,14 @@
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use inkwell::values::{PointerValue, FunctionValue};
+use inkwell::values::{PointerValue, FunctionValue, BasicValueEnum};
 use inkwell::basic_block::BasicBlock;
 
 #[derive(Debug)]
 pub struct Scope<'a> {
     pub variables: HashMap<String, Rc<PointerValue<'a>>>,
     pub functions: HashMap<String, Rc<FunctionValue<'a>>>,
+    pub fn_args: HashMap<String, Rc<BasicValueEnum<'a>>>,
     pub function: Option<Rc<FunctionValue<'a>>>,
     pub block: Option<Rc<BasicBlock<'a>>>
 }
@@ -47,6 +48,7 @@ impl<'a> Scope<'a> {
         Scope {
             variables: HashMap::new(),
             functions: HashMap::new(),
+            fn_args: HashMap::new(),
             function: None,
             block: None,
         }
@@ -56,6 +58,7 @@ impl<'a> Scope<'a> {
         Scope {
             variables: self.variables.clone(),
             functions: self.functions.clone(),
+            fn_args: HashMap::new(),
             function: None,
             block: None
         }
