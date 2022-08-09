@@ -39,6 +39,6 @@ impl ASTExpr for VariableCallExpr {
     }
  
     fn to_string(&self) -> String {
-        todo!()
+        format!("VarCall {}", self.name)
     }
 }
