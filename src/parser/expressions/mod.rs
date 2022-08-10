@@ -1,6 +1,6 @@
 use inkwell::{builder::Builder, module::Module, context::Context, values::AnyValueEnum, basic_block::BasicBlock };
 
-use crate::lexer::lexer::{Token, TokenType};
+use crate::{lexer::lexer::{Token, TokenType}, utils::error::Error};
 
 use self::{function_expression::FunctionExpr, scope::ScopeManager};
 pub mod scope;
@@ -11,7 +11,7 @@ pub trait ASTExpr {
 }
 
 pub trait Parseable {
-    fn parse(tokens: &Vec<Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, String>;
+    fn parse(tokens: &Vec<Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, Error>;
 }
 
 
@@ -25,8 +25,8 @@ impl ASTExpr for VoidExpr {
     }
 }
 impl Parseable for VoidExpr {
-    fn parse(tokens: &Vec<Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, String> {
-        return Err("Void expression is not parseable".to_string());
+    fn parse(tokens: &Vec<Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, Error> {
+        return Err(Error::new(crate::utils::error::ErrorKind::ParserError, "Void exprssion is not parseable".to_string()));
     }
 }
 

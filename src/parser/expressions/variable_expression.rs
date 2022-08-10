@@ -1,8 +1,6 @@
-
-
 use inkwell::values::{AnyValueEnum, AnyValue};
 
-use crate::lexer::lexer::TokenType;
+use crate::{lexer::lexer::TokenType, utils::{error::Error, error_components::token_component::ErrorTokenComponent}, error};
 
 use super::{Parseable, ASTExpr, data_types::ToAny, ScopeManager};
 
@@ -11,7 +9,7 @@ pub struct VariableCallExpr {
 }
 
 impl Parseable for VariableCallExpr {
-    fn parse(tokens: &Vec<crate::lexer::lexer::Token>, pos: &mut usize) -> Result<Box<dyn super::ASTExpr>, String> {
+    fn parse(tokens: &Vec<crate::lexer::lexer::Token>, pos: &mut usize) -> Result<Box<dyn super::ASTExpr>, Error> {
         let name = &tokens[*pos].token_type;
         match name {
             TokenType::Identifier(ref s) => {
@@ -20,7 +18,8 @@ impl Parseable for VariableCallExpr {
                     name: s.clone(),
                 }));
             },
-            _ => return Err(format!("Expected identifier, found {:?}", tokens[*pos]))
+            _ => return Err(error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing variable call",
+                                   ErrorTokenComponent::new("Expected variable name".to_string(), Some(tokens[*pos].clone()))))
         }
     }
 }

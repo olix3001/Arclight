@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use inkwell::{builder::Builder};
 
-use crate::{lexer::lexer::TokenType, parser_error};
+use crate::{lexer::lexer::TokenType, utils::{error::Error, error_components::token_component::ErrorTokenComponent}, error};
 
 use super::{ASTExpr, Parseable, VoidExpr, basic_expression::BasicExpr, data_types::DataType, scope::ScopeManager};
 
@@ -16,7 +16,7 @@ pub struct FunctionExpr {
 }
 
 impl Parseable for FunctionExpr {
-    fn parse(tokens: &Vec<crate::lexer::lexer::Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, String> {
+    fn parse(tokens: &Vec<crate::lexer::lexer::Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, Error> {
         let mut arguments: Vec<(String, DataType)> = Vec::new();
         let mut return_type: DataType = DataType::Void;
         let mut body: Box<dyn ASTExpr> = Box::new(VoidExpr {});
@@ -24,14 +24,16 @@ impl Parseable for FunctionExpr {
         
         // Should start with keyword "fn"
         if tokens[*pos].token_type != TokenType::Identifier("fun".to_string()) {
-            return Err(format!("Expected fun, found {:?}", tokens[*pos]));
+            return Err(error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing function",
+                              ErrorTokenComponent::new("Expected 'fun' keyword".to_string(), Some(tokens[*pos].clone()))));
         }
 
         // Should be followed by a name
         *pos += 1;
         match tokens[*pos].token_type {
             TokenType::Identifier(ref s) => { name = s.clone(); },
-            _ => parser_error!(format!("Expected name, found {:?}", tokens[*pos]))
+            _ => error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing function name",
+                        ErrorTokenComponent::new("Expected function name".to_string(), Some(tokens[*pos].clone()))).panic()
         }
 
         // TODO: Add generics
@@ -39,7 +41,8 @@ impl Parseable for FunctionExpr {
         // Should be followed by a parenthesis
         *pos += 1;
         if tokens[*pos].token_type != TokenType::Paren('(') {
-            parser_error!(format!("Expected parenthesis, found {:?}", tokens[*pos]));
+            error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing function",
+                   ErrorTokenComponent::new("Expected '('".to_string(), Some(tokens[*pos].clone()))).panic() 
         }
 
         // Should be followed by a list of arguments
@@ -50,17 +53,19 @@ impl Parseable for FunctionExpr {
                 TokenType::Identifier(ref s) => {
                     *pos += 1;
                     if tokens[*pos].token_type != TokenType::Separator(':') {
-                        parser_error!(format!("Expected colon, found {:?}", tokens[*pos]));
+                        error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing function arguments",
+                               ErrorTokenComponent::new("Expected ':'".to_string(), Some(tokens[*pos].clone()))).panic()
                     }
                     *pos += 1;
                     let data_type = DataType::parse(&tokens[*pos])?;
                     *pos += 1;
                     arguments.push((s.clone(), data_type));
                 },
-                _ => parser_error!(format!("Expected argument name, found {:?}", tokens[*pos]))
+                _ => error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing function arguments",
+                            ErrorTokenComponent::new("Expected argument name".to_string(), Some(tokens[*pos].clone()))).panic()
             }
             if tokens[*pos].token_type == TokenType::Separator(',') {
-                *pos += 1;
+                *pos += 1
             } else {
                 break;
             }
@@ -69,7 +74,8 @@ impl Parseable for FunctionExpr {
         // Should be followed by a colon
         *pos += 1;
         if tokens[*pos].token_type != TokenType::Separator(':') {
-            parser_error!(format!("Expected colon, found {:?}", tokens[*pos]));
+            error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing function",
+                   ErrorTokenComponent::new("Expected ':'".to_string(), Some(tokens[*pos].clone()))).panic()
         }
 
         // Should be followed by a return type
@@ -81,7 +87,7 @@ impl Parseable for FunctionExpr {
         let t = BasicExpr::parse(tokens, pos);
         match t {
             Ok(expr) => body = expr,
-            Err(_) => parser_error!(format!("Expected function body, found {:?}", tokens[*pos]))
+            Err(_) => error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing function body (TODO: Add line and column info)").panic()
         }
 
         // Return function

@@ -6,6 +6,7 @@ use inkwell::context::Context;
 mod lexer;
 mod parser;
 mod compiler;
+mod utils;
 
 fn main() {
     let mut f = File::open("test.arl").unwrap();

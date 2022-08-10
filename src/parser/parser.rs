@@ -1,4 +1,4 @@
-use crate::{lexer::lexer::Token, try_parse};
+use crate::{lexer::lexer::Token, try_parse, utils::error::Error};
 
 use super::expressions::{ASTExpr, import_expression::ImportExpr, Parseable, function_expression::FunctionExpr};
 
@@ -31,7 +31,7 @@ impl<'a> Parser<'a> {
                     ast.push(expr);
                 },
                 Err(err) => {
-                    println!("{}", err);
+                    err.print_err();
                     break;
                 }
             }
@@ -40,7 +40,7 @@ impl<'a> Parser<'a> {
         ast
     }
     
-    fn parse_expr<T>(&mut self) -> Result<Box<dyn ASTExpr>, String> where T: Parseable {
+    fn parse_expr<T>(&mut self) -> Result<Box<dyn ASTExpr>, Error> where T: Parseable {
         T::parse(self.tokens, &mut self.pos)
     }
     

@@ -1,4 +1,4 @@
-use crate::lexer::lexer::TokenType;
+use crate::{lexer::lexer::TokenType, utils::{error::Error, error_components::token_component::ErrorTokenComponent}, error};
 
 use super::{Parseable, ASTExpr, basic_expression::BasicExpr, function_expression::FunctionExpr, scope::ScopeManager};
 
@@ -7,10 +7,11 @@ pub struct BlockExpr {
 }
 
 impl Parseable for BlockExpr {
-    fn parse(tokens: &Vec<crate::lexer::lexer::Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, String> {
+    fn parse(tokens: &Vec<crate::lexer::lexer::Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, Error> {
         // Should start with brace
         if tokens[*pos].token_type != TokenType::Brace('{') {
-            return Err(format!("Expected {{, found {:?}", tokens[*pos]));
+            return Err(error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing block expression",
+                              ErrorTokenComponent::new("Expected '{{'".to_string(), Some(tokens[*pos].clone()))));
         }
 
         *pos += 1;

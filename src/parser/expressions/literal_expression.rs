@@ -2,13 +2,13 @@ use std::sync::Arc;
 
 use inkwell::values::AnyValueEnum;
 
-use crate::{lexer::lexer::{TokenType, Token}, try_parse};
+use crate::{lexer::lexer::{TokenType, Token}, try_parse, utils::{error::Error, error_components::token_component::ErrorTokenComponent}, error};
 
 use super::{ASTExpr, Parseable, scope::ScopeManager};
 
 pub struct LiteralExpr {}
 impl Parseable for LiteralExpr {
-    fn parse(tokens: &Vec<Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, String> {
+    fn parse(tokens: &Vec<Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, Error> {
         try_parse!(tokens, *pos, IntegerLiteralExpr)
     }
 }
@@ -33,7 +33,7 @@ pub struct IntegerLiteralExpr {
 
 impl Parseable for IntegerLiteralExpr {
     // TODO: Support more types and negative values (refactor this code)
-    fn parse(tokens: &Vec<Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, String> {
+    fn parse(tokens: &Vec<Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, Error> {
         match &tokens[*pos].token_type {
             TokenType::Number(value) => {
                 *pos += 1;
@@ -48,7 +48,8 @@ impl Parseable for IntegerLiteralExpr {
                     value: NumberValue::I32(value.parse::<i32>().unwrap()),
                 }));
             }
-            _ => return Err(format!("Expected integer literal, found {:?}", tokens[*pos]))
+            _ => return Err(error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing integer literal",
+                                   ErrorTokenComponent::new("Expected number literal".to_string(), Some(tokens[*pos].clone()))))
         }
     }
 }

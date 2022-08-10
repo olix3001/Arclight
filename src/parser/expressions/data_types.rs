@@ -1,6 +1,6 @@
 use inkwell::{context::Context, types::{AnyTypeEnum, BasicTypeEnum, BasicMetadataTypeEnum, FunctionType}, values::{AnyValueEnum, BasicValueEnum}};
 
-use crate::lexer::lexer::{Token, TokenType};
+use crate::{lexer::lexer::{Token, TokenType}, utils::{error::Error, error_components::token_component::ErrorTokenComponent}, error};
 
 
 #[derive(Debug, Clone)]
@@ -22,7 +22,7 @@ pub enum DataType {
     Unknown
 }
 impl DataType {
-    pub fn parse(token: &Token) -> Result<DataType, String> {
+    pub fn parse(token: &Token) -> Result<DataType, Error> {
         match token.token_type {
             TokenType::Identifier(ref s) => {
                 match s.as_str() {
@@ -42,7 +42,8 @@ impl DataType {
                     _ => Ok(DataType::Custom(vec![], false)),
                 }
             }
-            _ => Err(format!("Expected type, found {:?}", token)),
+            _ => Err(error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing data type",
+                            ErrorTokenComponent::new("Expected data type".to_string(), Some(token.clone())))),
         }
     }
 

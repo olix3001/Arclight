@@ -2,7 +2,7 @@ use std::{rc::Rc};
 
 use inkwell::{builder, values::{AnyValueEnum}};
 
-use crate::{lexer::lexer::TokenType, parser_error, parser::expressions::value_expression::ValueExpr};
+use crate::{lexer::lexer::TokenType, parser::expressions::value_expression::ValueExpr, utils::{error::Error, error_components::token_component::ErrorTokenComponent}, error};
 
 use super::{ASTExpr, Parseable, VoidExpr, data_types::{DataType, ToBasic}, scope::ScopeManager};
 
@@ -15,10 +15,11 @@ pub struct VarDefExpr {
 }
 
 impl Parseable for VarDefExpr {
-    fn parse(tokens: &Vec<crate::lexer::lexer::Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, String> {
+    fn parse(tokens: &Vec<crate::lexer::lexer::Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, Error> {
         // Should start with keyword "var"
         if tokens[*pos].token_type != TokenType::Identifier("var".to_string()) {
-            return Err(format!("Expected var, found {:?}", tokens[*pos]));
+            return Err(error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing variable declaration",
+                              ErrorTokenComponent::new("Expected 'var' keyword".to_string(), Some(tokens[*pos].clone()))));
         }
 
         // Should be followed by a name
@@ -28,30 +29,34 @@ impl Parseable for VarDefExpr {
             TokenType::Identifier(ref s) => {
                 name = s.clone();
             }
-            _ => parser_error!(format!("Expected variable name, found {:?}", tokens[*pos]))
+            _ => error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing variable declaration",
+                        ErrorTokenComponent::new("Expected variable name".to_string(), Some(tokens[*pos].clone()))).panic()
         }
 
         // TODO: Make type optional if can resolve type from value
         // Should be followed by a colon
         *pos += 1;
         if tokens[*pos].token_type != TokenType::Separator(':') {
-            parser_error!(format!("Expected colon, found {:?}", tokens[*pos]));
+            error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing variable type",
+                   ErrorTokenComponent::new("Expected ':'".to_string(), Some(tokens[*pos].clone()))).panic()
         }
 
         // Should be followed by a type
         *pos += 1;
         let mut var_type = Ok(DataType::Unknown);
+        let type_error = error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing variable type",
+                                ErrorTokenComponent::new("Expected type".to_string(), Some(tokens[*pos].clone())));
         match tokens[*pos].token_type {
             TokenType::Identifier(ref s) => {
                 var_type = DataType::parse(&tokens[*pos]);
                 if !var_type.is_ok() {
-                    parser_error!(format!("Expected type, found {:?}", tokens[*pos]));
+                    type_error.panic()
                 }
             }
-            _ => parser_error!(format!("Expected type, found {:?}", tokens[*pos]))
+            _ => type_error.panic()
         }
         if !var_type.is_ok() {
-            parser_error!(format!("Expected type, found {:?}", tokens[*pos]));
+            type_error.panic()
         }
 
         // Can be followed by an equals sign
@@ -61,7 +66,7 @@ impl Parseable for VarDefExpr {
         } else {
             return Ok(Box::new(VarDefExpr {
                 name,
-                data_type: var_type.unwrap(),
+                data_type: var_type.unwrap_or_else(|_| panic!("TODO")),
                 is_defined: false,
                 value: Box::new(VoidExpr {}),
                 is_mutable: true,
@@ -74,13 +79,17 @@ impl Parseable for VarDefExpr {
             Ok(v) => {
                 Ok(Box::new(VarDefExpr {
                     name,
-                    data_type: var_type.unwrap(),
+                    data_type: var_type.unwrap_or_else(|_| panic!("TODO")),
                     is_defined: true,
                     value: v,
                     is_mutable: true,
                 }))
             }
-            Err(e) => parser_error!(tokens[*pos], "Could not parse value")
+            Err(_e) => {
+                error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing variable definition",
+                             ErrorTokenComponent::new("Expected variable value".to_string(), Some(tokens[*pos].clone()))).panic_val();
+                panic!("Error while parsing variable definition")
+            }
         }
     }
 }

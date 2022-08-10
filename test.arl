@@ -1,4 +1,6 @@
 
+import "Hello";
+
 fun main(b: i16, a: i8, c: f32): i32 {
     var hello: i32;
     var world: i32 = hello; # This is a comment :p

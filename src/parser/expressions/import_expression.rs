@@ -1,6 +1,6 @@
 use inkwell::builder::Builder;
 
-use crate::{lexer::lexer::{Token, TokenType}, parser_error};
+use crate::{lexer::lexer::{Token, TokenType}, utils::{error::Error, error_components::token_component::ErrorTokenComponent}, error};
 
 use super::{ASTExpr, Parseable, scope::ScopeManager};
 
@@ -20,13 +20,14 @@ impl ImportExpr {
 }
 
 impl Parseable for ImportExpr {
-    fn parse(tokens: &Vec<Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, String> {
+    fn parse(tokens: &Vec<Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, Error> {
         let mut path: Vec<String> = Vec::new();
         let mut imports: Vec<String> = Vec::new();
         
         // Should start with keyword "import"
         if tokens[*pos].token_type != TokenType::Identifier("import".to_string()) {
-            return Err(format!("Expected import, found {:?}", tokens[*pos]));
+            return Err(error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing import expression",
+                            ErrorTokenComponent::new("Expected 'import' keyword".to_string(), Some(tokens[*pos].clone()))));
         }
     
         // Should be followed by a path
@@ -35,14 +36,16 @@ impl Parseable for ImportExpr {
             // Path
             match tokens[*pos].token_type {
                 TokenType::Identifier(ref s) => path.push(s.clone()),
-                _ => parser_error!(format!("Expected path, found {:?}", tokens[*pos]))
+                _ => error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing import expression path",
+                            ErrorTokenComponent::new("Expected path".to_string(), Some(tokens[*pos].clone()))).panic()
             }
             *pos += 1;
     
             if tokens[*pos].token_type == TokenType::Separator(';') {
                 // Expect semicolon
                 if tokens[*pos].token_type != TokenType::Separator(';') {
-                    parser_error!(format!("Expected semicolon, found {:?}", tokens[*pos]));
+                    error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing import expression",
+                           ErrorTokenComponent::new("Expected ';'".to_string(), Some(tokens[*pos].clone()))).panic()
                 }
                 *pos += 1;
                 return Ok(Box::new(ImportExpr::new(path, imports)));
@@ -57,7 +60,8 @@ impl Parseable for ImportExpr {
             if tokens[*pos].token_type == TokenType::Separator(':') {
                 *pos += 1;
             } else {
-                parser_error!(tokens[*pos], "Expected double colon, found only one");
+                error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing import path",
+                       ErrorTokenComponent::new("Expected '::'".to_string(), Some(tokens[*pos-1].clone()))).panic()
             }
         }
         
@@ -68,7 +72,8 @@ impl Parseable for ImportExpr {
             while tokens[*pos].token_type != TokenType::Brace('}') {
                 match tokens[*pos].token_type {
                     TokenType::Identifier(ref s) => imports.push(s.clone()),
-                    _ => parser_error!(tokens[*pos], format!("Expected import, found {:?}", tokens[*pos])),
+                    _ => error!(crate::utils::error::ErrorKind::ParserError, "Error while parsing import names",
+                                ErrorTokenComponent::new("Expected import name".to_string(), Some(tokens[*pos].clone()))).panic()
                 }
                 *pos += 1;
                 if tokens[*pos].token_type == TokenType::Separator(',') {
@@ -82,7 +87,8 @@ impl Parseable for ImportExpr {
     
         // Should be followed by a semicolon
         if tokens[*pos].token_type != TokenType::Separator(';') {
-            parser_error!(format!("Expected semicolon, found {:?}", tokens[*pos]));
+            error!(crate::utils::error::ErrorKind::ParserError, "error while parsing import expression",
+                   ErrorTokenComponent::new("Expected ';'".to_string(), Some(tokens[*pos].clone()))).panic()
         }
         *pos += 1;
     
