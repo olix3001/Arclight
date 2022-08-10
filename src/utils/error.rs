@@ -17,6 +17,12 @@ pub struct Error {
     components: Vec<Box<dyn ErrorComponent>>
 }
 
+impl Debug for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_short_string())
+    }
+}
+
 impl Error {
     pub fn new(kind: ErrorKind, message: String) -> Error {
         Error {
