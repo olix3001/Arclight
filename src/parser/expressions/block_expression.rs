@@ -31,7 +31,7 @@ impl Parseable for BlockExpr {
 impl ASTExpr for BlockExpr {
 
     fn to_string(&self) -> String {
-        format!("{{\n {} \n}}", self.statements.iter().map(|s| s.to_string()).collect::<Vec<String>>().join("\n"))
+        format!("{{\n\t {} \n}}", self.statements.iter().map(|s| s.to_string()).collect::<Vec<String>>().join("\n\t "))
     }
 
     fn generate<'a, 'b>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &inkwell::builder::Builder<'a>, scope_manager: &'b mut ScopeManager<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {

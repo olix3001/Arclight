@@ -33,8 +33,9 @@ impl<'a> ScopeManager<'a> {
     }
 
     pub fn create_scope(&mut self) {
+        let scope = self.scope.extend();
         self.scopes.push(Box::new(self.scope.extend()));
-        self.scope = Scope::new();
+        self.scope = scope; 
     }
 
     pub fn exit_scope(&mut self) {
@@ -58,7 +59,7 @@ impl<'a> Scope<'a> {
         Scope {
             variables: self.variables.clone(),
             functions: self.functions.clone(),
-            fn_args: HashMap::new(),
+            fn_args: self.fn_args.clone(),
             function: None,
             block: None
         }

@@ -110,6 +110,7 @@ impl ASTExpr for VarDefExpr {
             // Store value if defined
             if self.is_defined {
                 let value = self.value.generate(context, module, builder, scope_manager);
+                // TODO: Custom error if value is null
                 builder.build_store(alloca, value.unwrap().to_basic());
             }
             // Add alloca to variables

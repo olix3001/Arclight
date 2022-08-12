@@ -162,7 +162,7 @@ mod tests {
         ];
         let mut pos = 0;
         let expr = super::FunctionExpr::parse(&tokens, &mut pos).unwrap();
-        assert_eq!(expr.to_string(), "Function () => I32 {\n  \n}");
+        assert_eq!(expr.to_string(), "Function () => I32 {\n\t  \n}");
     }
 
     #[test]
@@ -186,7 +186,7 @@ mod tests {
         ];
         let mut pos = 0;
         let expr = super::FunctionExpr::parse(&tokens, &mut pos).unwrap();
-        assert_eq!(expr.to_string(), "Function (arg1: F32, arg2: I64, ) => U16 {\n  \n}");
+        assert_eq!(expr.to_string(), "Function (arg1: F32, arg2: I64, ) => U16 {\n\t  \n}");
     }
 
 }

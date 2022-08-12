@@ -26,6 +26,12 @@ impl Parseable for VariableCallExpr {
 
 impl ASTExpr for VariableCallExpr {
     fn generate<'a, 'b>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &inkwell::builder::Builder<'a>, scope_manager: &'b mut ScopeManager<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
+        // Get function argument
+        let fn_var = scope_manager.scope.fn_args.get(&self.name);
+        if fn_var.is_some() {
+            return Some(fn_var.unwrap().as_any_value_enum())
+        }
+        // Get normal variable
         let var = scope_manager.scope.variables.get(&self.name);
         if var.is_none() {
             return None;
