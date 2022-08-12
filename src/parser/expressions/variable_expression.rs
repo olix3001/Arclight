@@ -1,6 +1,6 @@
 use inkwell::values::{AnyValueEnum, AnyValue};
-
-use crate::{lexer::lexer::TokenType, utils::{error::Error, error_components::token_component::ErrorTokenComponent}, error};
+use colored::*;
+use crate::{lexer::lexer::TokenType, utils::{error::Error, error_components::{token_component::ErrorTokenComponent, name_component::NameErrorComponent}}, error};
 
 use super::{Parseable, ASTExpr, data_types::ToAny, ScopeManager};
 
@@ -34,6 +34,8 @@ impl ASTExpr for VariableCallExpr {
         // Get normal variable
         let var = scope_manager.scope.variables.get(&self.name);
         if var.is_none() {
+            error!(crate::utils::error::ErrorKind::CompilerError, "Variable does not exist",
+                   NameErrorComponent::new(format!("Variable '{}' does not exist", &self.name.green()))).panic();
             return None;
         }
         let var = var.unwrap();

@@ -1,8 +1,8 @@
 use std::{rc::Rc};
-
+use colored::*;
 use inkwell::{builder, values::{AnyValueEnum}};
 
-use crate::{lexer::lexer::TokenType, parser::expressions::value_expression::ValueExpr, utils::{error::Error, error_components::token_component::ErrorTokenComponent}, error};
+use crate::{lexer::lexer::TokenType, parser::expressions::value_expression::ValueExpr, utils::{error::Error, error_components::{token_component::ErrorTokenComponent, name_component::NameErrorComponent}}, error};
 
 use super::{ASTExpr, Parseable, VoidExpr, data_types::{DataType, ToBasic}, scope::ScopeManager};
 
@@ -110,7 +110,8 @@ impl ASTExpr for VarDefExpr {
             // Store value if defined
             if self.is_defined {
                 let value = self.value.generate(context, module, builder, scope_manager);
-                // TODO: Custom error if value is null
+                error!(crate::utils::error::ErrorKind::CompilerError, "Expected value for variable definition", 
+                       NameErrorComponent::new(format!("Expected value for variable '{}', but got nothing", &self.name.green()))).panic();
                 builder.build_store(alloca, value.unwrap().to_basic());
             }
             // Add alloca to variables
