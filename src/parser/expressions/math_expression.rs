@@ -78,7 +78,12 @@ impl ASTExpr for MathExpr {
                 MathOperation::DIVIDE => builder.build_int_signed_div(lhs.into_int_value(), rhs.into_int_value(), "isdivtmp")
             }))
         } else if lhs.is_float_value() {
-            todo!("Implement float math")
+            return Some(AnyValueEnum::FloatValue(match self.operation {
+                MathOperation::ADD => builder.build_float_add(lhs.into_float_value(), rhs.into_float_value(), "faddtmp"),
+                MathOperation::SUBTRACT => builder.build_float_sub(lhs.into_float_value(), rhs.into_float_value(), "fsubtmp"),
+                MathOperation::MULTIPLY => builder.build_float_mul(lhs.into_float_value(), rhs.into_float_value(), "fmultmp"),
+                MathOperation::DIVIDE => builder.build_float_div(lhs.into_float_value(), rhs.into_float_value(), "fdivtmp")
+            }))
         }
 
         todo!("Implement some error")
@@ -152,5 +157,65 @@ mod tests {
         assert!(expr.is_ok());
         let expr = expr.unwrap();
         assert_eq!(expr.to_string(), "DIVIDE I32(5), I32(3)");
+    }
+
+    #[test]
+    fn parse_add_f64() {
+        let tokens = vec![
+            test_token!(TokenType::Number("5.0".to_string())),
+            test_token!(TokenType::Operator("+".to_string())),
+            test_token!(TokenType::Number("3.0".to_string())),
+            test_token!(TokenType::Separator(';'))
+        ];
+        let mut pos = 0;
+        let expr = super::MathExpr::parse(&tokens, &mut pos);
+        assert!(expr.is_ok());
+        let expr = expr.unwrap();
+        assert_eq!(expr.to_string(), "ADD F64(5.0), F64(3.0)");
+    }
+
+    #[test]
+    fn parse_sub_f64() {
+        let tokens = vec![
+            test_token!(TokenType::Number("5.0".to_string())),
+            test_token!(TokenType::Operator("-".to_string())),
+            test_token!(TokenType::Number("3.0".to_string())),
+            test_token!(TokenType::Separator(';'))
+        ];
+        let mut pos = 0;
+        let expr = super::MathExpr::parse(&tokens, &mut pos);
+        assert!(expr.is_ok());
+        let expr = expr.unwrap();
+        assert_eq!(expr.to_string(), "SUBTRACT F64(5.0), F64(3.0)");
+    }
+
+    #[test]
+    fn parse_mul_f64() {
+        let tokens = vec![
+            test_token!(TokenType::Number("5.0".to_string())),
+            test_token!(TokenType::Operator("*".to_string())),
+            test_token!(TokenType::Number("3.0".to_string())),
+            test_token!(TokenType::Separator(';'))
+        ];
+        let mut pos = 0;
+        let expr = super::MathExpr::parse(&tokens, &mut pos);
+        assert!(expr.is_ok());
+        let expr = expr.unwrap();
+        assert_eq!(expr.to_string(), "MULTIPLY F64(5.0), F64(3.0)");
+    }
+
+    #[test]
+    fn parse_div_f64() {
+        let tokens = vec![
+            test_token!(TokenType::Number("5.0".to_string())),
+            test_token!(TokenType::Operator("/".to_string())),
+            test_token!(TokenType::Number("3.0".to_string())),
+            test_token!(TokenType::Separator(';'))
+        ];
+        let mut pos = 0;
+        let expr = super::MathExpr::parse(&tokens, &mut pos);
+        assert!(expr.is_ok());
+        let expr = expr.unwrap();
+        assert_eq!(expr.to_string(), "DIVIDE F64(5.0), F64(3.0)");
     }
 }
