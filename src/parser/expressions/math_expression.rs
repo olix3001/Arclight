@@ -88,3 +88,69 @@ impl ASTExpr for MathExpr {
         format!("{:?} {}, {}", self.operation, self.lhs.to_string(), self.rhs.to_string())
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use crate::{test_token, lexer::lexer::TokenType, parser::expressions::Parseable};
+
+    #[test]
+    fn parse_add_i32() {
+        let tokens = vec![
+            test_token!(TokenType::Number("5".to_string())),
+            test_token!(TokenType::Operator("+".to_string())),
+            test_token!(TokenType::Number("3".to_string())),
+            test_token!(TokenType::Separator(';'))
+        ];
+        let mut pos = 0;
+        let expr = super::MathExpr::parse(&tokens, &mut pos);
+        assert!(expr.is_ok());
+        let expr = expr.unwrap();
+        assert_eq!(expr.to_string(), "ADD I32(5), I32(3)");
+    }
+
+    #[test]
+    fn parse_sub_i32() {
+        let tokens = vec![
+            test_token!(TokenType::Number("5".to_string())),
+            test_token!(TokenType::Operator("-".to_string())),
+            test_token!(TokenType::Number("3".to_string())),
+            test_token!(TokenType::Separator(';'))
+        ];
+        let mut pos = 0;
+        let expr = super::MathExpr::parse(&tokens, &mut pos);
+        assert!(expr.is_ok());
+        let expr = expr.unwrap();
+        assert_eq!(expr.to_string(), "SUBTRACT I32(5), I32(3)");
+    }
+
+    #[test]
+    fn parse_mul_i32() {
+        let tokens = vec![
+            test_token!(TokenType::Number("5".to_string())),
+            test_token!(TokenType::Operator("*".to_string())),
+            test_token!(TokenType::Number("3".to_string())),
+            test_token!(TokenType::Separator(';'))
+        ];
+        let mut pos = 0;
+        let expr = super::MathExpr::parse(&tokens, &mut pos);
+        assert!(expr.is_ok());
+        let expr = expr.unwrap();
+        assert_eq!(expr.to_string(), "MULTIPLY I32(5), I32(3)");
+    }
+
+    #[test]
+    fn parse_div_i32() {
+        let tokens = vec![
+            test_token!(TokenType::Number("5".to_string())),
+            test_token!(TokenType::Operator("/".to_string())),
+            test_token!(TokenType::Number("3".to_string())),
+            test_token!(TokenType::Separator(';'))
+        ];
+        let mut pos = 0;
+        let expr = super::MathExpr::parse(&tokens, &mut pos);
+        assert!(expr.is_ok());
+        let expr = expr.unwrap();
+        assert_eq!(expr.to_string(), "DIVIDE I32(5), I32(3)");
+    }
+}
