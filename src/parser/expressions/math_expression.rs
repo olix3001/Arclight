@@ -70,6 +70,7 @@ impl ASTExpr for MathExpr {
 
         let lhs = lhs.unwrap();
         let rhs = rhs.unwrap();
+        // TODO: Check if types are matching
         if lhs.is_int_value() {
             return Some(AnyValueEnum::IntValue(match self.operation {
                 MathOperation::ADD => builder.build_int_add(lhs.into_int_value(), rhs.into_int_value(), "iaddtmp"),

@@ -108,7 +108,7 @@ impl ASTExpr for FunctionExpr {
             arguments.push_str(&format!("{}: {:?}, ", arg.0, arg.1));
         }
 
-        format!("Function ({}) => {:?} {}", arguments, self.return_type, self.body.to_string())
+        format!("Function {}({}) => {:?} {}", self.name, arguments, self.return_type, self.body.to_string())
     }
 
     fn generate<'a, 'b>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &Builder<'a>, scope_manager: &'b mut ScopeManager<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
@@ -162,7 +162,7 @@ mod tests {
         ];
         let mut pos = 0;
         let expr = super::FunctionExpr::parse(&tokens, &mut pos).unwrap();
-        assert_eq!(expr.to_string(), "Function () => I32 {\n\t  \n}");
+        assert_eq!(expr.to_string(), "Function test() => I32 {\n\t  \n}");
     }
 
     #[test]
@@ -186,7 +186,7 @@ mod tests {
         ];
         let mut pos = 0;
         let expr = super::FunctionExpr::parse(&tokens, &mut pos).unwrap();
-        assert_eq!(expr.to_string(), "Function (arg1: F32, arg2: I64, ) => U16 {\n\t  \n}");
+        assert_eq!(expr.to_string(), "Function test(arg1: F32, arg2: I64, ) => U16 {\n\t  \n}");
     }
 
 }

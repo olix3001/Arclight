@@ -21,7 +21,6 @@ impl Parseable for BlockExpr {
             statements.push(expr);
         }
 
-        *pos += 1;
         Ok(Box::new(BlockExpr {
             statements,
         }))
