@@ -110,8 +110,10 @@ impl ASTExpr for VarDefExpr {
             // Store value if defined
             if self.is_defined {
                 let value = self.value.generate(context, module, builder, scope_manager);
-                error!(crate::utils::error::ErrorKind::CompilerError, "Expected value for variable definition", 
-                       NameErrorComponent::new(format!("Expected value for variable '{}', but got nothing", &self.name.green()))).panic();
+                if value.is_none() {
+                    error!(crate::utils::error::ErrorKind::CompilerError, "Expected value for variable definition", 
+                           NameErrorComponent::new(format!("Expected value for variable '{}', but got nothing", &self.name.green()))).panic();
+                }
                 builder.build_store(alloca, value.unwrap().to_basic());
             }
             // Add alloca to variables
