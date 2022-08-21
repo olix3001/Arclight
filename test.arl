@@ -2,7 +2,7 @@
 
 fun main(b: i32, a: i32, c: i32): i32 {
     var hello: i32 = a + b + 1;
-    var fp: f64 = 1.5 + 1.2;
+    var fp: f64 = 1.5 + 1;
     var world: i32 = hello + c; # This is a comment :p
 }
 

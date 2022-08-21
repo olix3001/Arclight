@@ -1,7 +1,7 @@
 
 use inkwell::values::{AnyValueEnum, IntValue};
 
-use crate::{error, utils::error::{Error, ErrorKind}, lexer::lexer::TokenType};
+use crate::{error, utils::{error::{Error, ErrorKind}, error_components::name_component::NameErrorComponent}, lexer::lexer::TokenType};
 
 use super::{ASTExpr, Parseable, value_expression};
 
@@ -61,16 +61,21 @@ impl ASTExpr for MathExpr {
     fn generate<'a, 'b>(&self, context: &'a inkwell::context::Context, module: &inkwell::module::Module<'a>, builder: &inkwell::builder::Builder<'a>, scope_manager: &'b mut super::scope::ScopeManager<'a>) -> Option<inkwell::values::AnyValueEnum<'a>> {
         let lhs = self.lhs.generate(context, module, builder, scope_manager);
         if lhs.is_none() {
-            panic!("LHS ERROR (TODO: implement this better)")
+            error!(ErrorKind::CompilerError, "Expected LHS for binary expression").panic();
         }
         let rhs = self.rhs.generate(context, module, builder, scope_manager);
         if rhs.is_none() {
-            panic!("RHS ERROR (TODO: implement this better)")
+            error!(ErrorKind::CompilerError, "Expected RHS for binary expression").panic();
         }
 
         let lhs = lhs.unwrap();
         let rhs = rhs.unwrap();
         // TODO: Check if types are matching
+        if lhs.get_type() != rhs.get_type() {
+            error!(ErrorKind::CompilerError, "Binary operation types do not match",
+                   NameErrorComponent::new(format!("LHS: {}", lhs.get_type()))
+                   NameErrorComponent::new(format!("RHS: {}", lhs.get_type()))).panic();
+        }
         if lhs.is_int_value() {
             return Some(AnyValueEnum::IntValue(match self.operation {
                 MathOperation::ADD => builder.build_int_add(lhs.into_int_value(), rhs.into_int_value(), "iaddtmp"),
