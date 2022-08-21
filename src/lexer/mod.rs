@@ -103,7 +103,7 @@ pub mod lexer {
                             ';' => add_token!(self, TokenType::Separator(';'), LexerState::Start),
                             '=' => add_token!(self, LexerState::Operator, c ;),
                             '+' => add_token!(self, LexerState::Operator, c ;),
-                            '-' => add_token!(self, LexerState::Operator, c ;),
+                            '-' => add_token!(self, LexerState::Number, c ;),
                             '*' => add_token!(self, LexerState::Operator, c ;),
                             '%' => add_token!(self, LexerState::Operator, c ;),
                             '!' => add_token!(self, LexerState::Operator, c ;),
@@ -139,13 +139,19 @@ pub mod lexer {
                 LexerState::Number => {
                     // Number
                     match c {
-                        '0' ..= '9' | '.' => {
+                        '0' ..= '9' | '.' | 'f' | 'u' | 'i' => {
                             self.curr_token.push(c);
                         }
                         _ => {
+                            if self.curr_token.len() == 1 && self.curr_token.chars().next().unwrap() == '-' {
+                                add_token!(self, TokenType::Operator(self.curr_token.clone()), LexerState::Start);
+                                self.curr_token.clear();
+                                self.feed(c);
+                                return;
+                            }
                             add_token!(self, TokenType::Number(self.curr_token.clone()), LexerState::Start);
-                            self.feed(c);
                             self.curr_token.clear();
+                            self.feed(c);
                         }
                     }
                 }

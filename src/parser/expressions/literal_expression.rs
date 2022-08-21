@@ -23,7 +23,7 @@ enum NumberValue {
     U16(u16),
     U32(u32),
     U64(u64),
-    F32(f64),
+    F32(f32),
     F64(f64),
 }
 
@@ -32,11 +32,35 @@ pub struct IntegerLiteralExpr {
 }
 
 impl Parseable for IntegerLiteralExpr {
-    // TODO: Support more types and negative values (refactor this code)
     fn parse(tokens: &Vec<Token>, pos: &mut usize) -> Result<Box<dyn ASTExpr>, Error> {
         match &tokens[*pos].token_type {
             TokenType::Number(value) => {
                 *pos += 1;
+
+                if value.contains('f') || value.contains('u') || value.contains('i') {
+                    let s: String;
+                    let v: String;
+                    if value.contains('f') { s = "f".to_owned() + value.split('f').last().unwrap(); v = value.split('f').next().unwrap().to_string(); }
+                    else if value.contains('u') { s = "u".to_owned() + value.split('u').last().unwrap(); v = value.split('u').next().unwrap().to_string(); }
+                    else if value.contains('i') { s = "i".to_owned() + value.split('i').last().unwrap(); v = value.split('i').next().unwrap().to_string(); }
+                    else { s = "".to_string(); v = value.to_string(); }
+
+                    return Ok(Box::new(IntegerLiteralExpr {
+                        value: match s.as_str() {
+                            "i8" => NumberValue::I8(v.parse::<i8>().unwrap()),
+                            "i16" => NumberValue::I16(v.parse::<i16>().unwrap()),
+                            "i32" => NumberValue::I32(v.parse::<i32>().unwrap()),
+                            "i64" => NumberValue::I64(v.parse::<i64>().unwrap()),
+                            "u8" => NumberValue::U8(v.parse::<u8>().unwrap()),
+                            "u16" => NumberValue::U16(v.parse::<u16>().unwrap()),
+                            "u32" => NumberValue::U32(v.parse::<u32>().unwrap()),
+                            "u64" => NumberValue::U64(v.parse::<u64>().unwrap()),
+                            "f32" => NumberValue::F32(v.parse::<f32>().unwrap()),
+                            "f64" => NumberValue::F64(v.parse::<f64>().unwrap()),
+                            _ => NumberValue::I8(0)
+                        }
+                    }));
+                }
 
                 if value.contains('.') {
                     return Ok(Box::new(IntegerLiteralExpr {
